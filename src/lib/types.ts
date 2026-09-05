@@ -5,6 +5,14 @@ export type Artisan = {
   email?: string | null;
   trade: string;
   company_name?: string | null;
+  /** true = tutoyer le client dans l'intro ; false = vouvoyer (défaut) */
+  tutoiement?: boolean;
+  /** Marge / uplift % appliquée aux prix unitaires HT (défaut 30) */
+  marge_pct?: number;
+  /** TVA par défaut sur les lignes : 10 ou 20 (défaut 10) */
+  default_tva?: number;
+  siret?: string | null;
+  city?: string | null;
   created_at: string;
 };
 
@@ -100,3 +108,17 @@ export type DbShape = {
   review_tokens: ReviewToken[];
   message_inbox: MessageInbox[];
 };
+
+/** Defaults for artisans loaded from older store.json without new fields */
+export function artisanDefaults(a: Artisan): Required<
+  Pick<Artisan, "tutoiement" | "marge_pct" | "default_tva">
+> &
+  Pick<Artisan, "siret" | "city"> {
+  return {
+    tutoiement: a.tutoiement ?? false,
+    marge_pct: a.marge_pct ?? 30,
+    default_tva: a.default_tva ?? 10,
+    siret: a.siret ?? null,
+    city: a.city ?? null,
+  };
+}

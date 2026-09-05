@@ -12,30 +12,31 @@ type Result = {
 export default function GoPage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
+  const [tutoiement, setTutoiement] = useState(false);
+  const [photoNames, setPhotoNames] = useState<string[]>([]);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
     setResult(null);
-    const fd = new FormData(e.currentTarget);
-    const payload = {
-      artisan_name: String(fd.get("artisan_name") || ""),
-      artisan_phone: String(fd.get("artisan_phone") || ""),
-      company_name: String(fd.get("company_name") || "") || undefined,
-      client_name: String(fd.get("client_name") || ""),
-      client_address: String(fd.get("client_address") || "") || undefined,
-      client_phone: String(fd.get("client_phone") || "") || undefined,
-      description: String(fd.get("description") || ""),
-      urgency: String(fd.get("urgency") || "") || undefined,
-      source: "web",
-      auto_draft: true,
-    };
+    const form = e.currentTarget;
+    const fd = new FormData(form);
+    fd.set("tutoiement", tutoiement ? "true" : "false");
+    fd.set("source", "web");
+    fd.set("auto_draft", "true");
+
+    // Ensure photos field name is "photos"
+    const photosInput = form.querySelector<HTMLInputElement>('input[name="photos"]');
+    if (photosInput?.files && photosInput.files.length > 3) {
+      setResult({ ok: false, error: "Maximum 3 photos" });
+      setLoading(false);
+      return;
+    }
 
     try {
       const res = await fetch("/api/jobs", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: fd,
       });
       const json = (await res.json()) as Result;
       setResult(json);
@@ -51,11 +52,11 @@ export default function GoPage() {
       <div>
         <h1 className="text-2xl font-bold text-stone-900">Envoyer un chantier</h1>
         <p className="mt-1 text-stone-600">
-          Mobile-first. Pas de configuration. Un brouillon de devis en retour.
+          Mobile-first. Photos des notes, préférences, brouillon en retour.
         </p>
       </div>
 
-      <form onSubmit={onSubmit} className="card space-y-4">
+      <form onSubmit={onSubmit} className="card space-y-4" encType="multipart/form-data">
         <fieldset className="space-y-3">
           <legend className="mb-1 text-sm font-semibold text-[#6B4EFF]">
             Vous (artisan)
@@ -71,6 +72,67 @@ export default function GoPage() {
           <div>
             <label className="label" htmlFor="company_name">Entreprise (optionnel)</label>
             <input className="input" id="company_name" name="company_name" placeholder="Martin Plomberie" />
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="label" htmlFor="siret">SIRET (optionnel)</label>
+              <input className="input" id="siret" name="siret" placeholder="123 456 789 00012" />
+            </div>
+            <div>
+              <label className="label" htmlFor="city">Ville (optionnel)</label>
+              <input className="input" id="city" name="city" placeholder="Lyon" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset className="space-y-3">
+          <legend className="mb-1 text-sm font-semibold text-[#6B4EFF]">
+            Préférences devis
+          </legend>
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-[#ebe4da] bg-[#fffcf8] px-3 py-3">
+            <div>
+              <p className="text-sm font-semibold text-stone-800">Tutoiement client</p>
+              <p className="text-xs text-stone-500">
+                {tutoiement ? "Tu / toi dans l'intro" : "Vous dans l'intro (défaut)"}
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={tutoiement}
+              onClick={() => setTutoiement((v) => !v)}
+              className={`relative h-8 w-14 rounded-full transition ${
+                tutoiement ? "bg-[#6B4EFF]" : "bg-stone-300"
+              }`}
+            >
+              <span
+                className={`absolute top-1 left-1 h-6 w-6 rounded-full bg-white transition ${
+                  tutoiement ? "translate-x-6" : ""
+                }`}
+              />
+            </button>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="label" htmlFor="marge_pct">Marge / coeff. (%)</label>
+              <input
+                className="input"
+                id="marge_pct"
+                name="marge_pct"
+                type="number"
+                min={0}
+                max={200}
+                step={1}
+                defaultValue={30}
+              />
+            </div>
+            <div>
+              <label className="label" htmlFor="default_tva">TVA défaut</label>
+              <select className="input" id="default_tva" name="default_tva" defaultValue="10">
+                <option value="10">10 % (rénovation)</option>
+                <option value="20">20 % (neuf / fournitures)</option>
+              </select>
+            </div>
           </div>
         </fieldset>
 
@@ -98,6 +160,40 @@ export default function GoPage() {
               name="description"
               required
               placeholder="Chauffe-eau électrique HS, à remplacer par un 200L…"
+            />
+          </div>
+          <div>
+            <label className="label" htmlFor="photos">Photos des notes (1 à 3)</label>
+            <input
+              className="input"
+              id="photos"
+              name="photos"
+              type="file"
+              accept="image/*"
+              multiple
+              capture="environment"
+              onChange={(e) => {
+                const files = Array.from(e.target.files || []).slice(0, 3);
+                setPhotoNames(files.map((f) => f.name));
+              }}
+            />
+            {photoNames.length > 0 ? (
+              <p className="mt-1 text-xs text-stone-500">
+                {photoNames.length} photo{photoNames.length > 1 ? "s" : ""} : {photoNames.join(", ")}
+              </p>
+            ) : (
+              <p className="mt-1 text-xs text-stone-400">
+                Ex. photo du carnet de notes ou de la plaque signalétique.
+              </p>
+            )}
+          </div>
+          <div>
+            <label className="label" htmlFor="photo_note">Note sur les photos (optionnel)</label>
+            <input
+              className="input"
+              id="photo_note"
+              name="photo_note"
+              placeholder="Marque du ballon illisible, accès étage…"
             />
           </div>
           <div>

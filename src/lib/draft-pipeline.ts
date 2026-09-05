@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { db } from "./db";
-import type { Job, QuoteDraft, QuoteLineItem } from "./types";
+import { artisanDefaults, type Artisan, type Job, type QuoteDraft, type QuoteLineItem } from "./types";
 
 function round2(n: number) {
   return Math.round(n * 100) / 100;
@@ -19,7 +19,36 @@ function totals(items: QuoteLineItem[]) {
   return { total_ht, total_tva, total_ttc: round2(total_ht + total_tva) };
 }
 
-function mockLineItems(job: Job): QuoteLineItem[] {
+/** Apply artisan marge % on base unit prices (base = cost-ish; selling = base * (1+marge/100)) */
+function applyMarge(items: QuoteLineItem[], margePct: number): QuoteLineItem[] {
+  const factor = 1 + margePct / 100;
+  return items.map((i) => ({
+    ...i,
+    unit_price_ht: round2(i.unit_price_ht * factor),
+  }));
+}
+
+function applyDefaultTva(items: QuoteLineItem[], defaultTva: number): QuoteLineItem[] {
+  return items.map((i) => ({
+    ...i,
+    tva_rate: i.tva_rate || defaultTva,
+  }));
+}
+
+function buildIntro(
+  job: Job,
+  artisan: Artisan | undefined,
+  tutoiement: boolean
+): string {
+  const company = artisan?.company_name || artisan?.name || "Votre artisan";
+  const descSnippet = job.description.slice(0, 140).trim();
+  if (tutoiement) {
+    return `Bonjour ${job.client_name},\n\nSuite à ta demande concernant « ${descSnippet} », voici mon devis détaillé.\n\nN'hésite pas à me rappeler si tu as une question.\n\nCordialement,\n${company}`;
+  }
+  return `Madame, Monsieur,\n\nSuite à votre demande concernant « ${descSnippet} », veuillez trouver ci-dessous notre devis détaillé.\n\nRestant à votre disposition pour toute précision,\n\nCordialement,\n${company}`;
+}
+
+function mockLineItems(job: Job, defaultTva: number): QuoteLineItem[] {
   const desc = job.description.toLowerCase();
   const items: QuoteLineItem[] = [];
 
@@ -28,7 +57,7 @@ function mockLineItems(job: Job): QuoteLineItem[] {
     quantity: number,
     unit: string,
     unit_price_ht: number,
-    tva_rate = 10
+    tva_rate = defaultTva
   ) => {
     items.push({
       id: randomUUID(),
@@ -41,59 +70,96 @@ function mockLineItems(job: Job): QuoteLineItem[] {
   };
 
   if (desc.includes("chauffe") || desc.includes("ballon") || desc.includes("eau chaude")) {
-    push("Dépose ancien chauffe-eau", 1, "forfait", 85);
-    push("Fourniture chauffe-eau électrique 200L", 1, "u", 420);
-    push("Pose et raccordements hydrauliques / électriques", 1, "forfait", 280);
-    push("Mise en service et essai", 1, "forfait", 65);
-    push("Évacuation ancien appareil", 1, "forfait", 45);
-  } else if (desc.includes("fuite") || desc.includes("robinet") || desc.includes("wc")) {
-    push("Diagnostic et localisation de fuite", 1, "forfait", 75);
-    push("Fourniture pièces (joints / robinetterie)", 1, "forfait", 55);
-    push("Main d'œuvre réparation", 1.5, "h", 65);
-    push("Essai d'étanchéité", 1, "forfait", 35);
-  } else if (desc.includes("chaudière") || desc.includes("radiateur") || desc.includes("chauffage")) {
-    push("Diagnostic chaudière / circuit chauffage", 1, "forfait", 95);
-    push("Fourniture pièces détachées", 1, "forfait", 120);
-    push("Intervention technicien chauffage", 2, "h", 75);
-    push("Purge et équilibrage", 1, "forfait", 55);
+    push("Déplacement et diagnostic installation ECS", 1, "forfait", 65);
+    push("Dépose ancien chauffe-eau / ballon", 1, "forfait", 85);
+    push("Fourniture chauffe-eau électrique 200L (classe énergétique A)", 1, "u", 389);
+    push("Pose, raccordements hydrauliques et électriques", 1, "forfait", 265);
+    push("Groupe de sécurité + flexible inox", 1, "forfait", 48);
+    push("Mise en service, essai étanchéité et consuel basique", 1, "forfait", 55);
+    push("Évacuation et recyclage ancien appareil", 1, "forfait", 42);
+  } else if (
+    desc.includes("fuite") ||
+    desc.includes("robinet") ||
+    desc.includes("wc") ||
+    desc.includes("chasse")
+  ) {
+    push("Déplacement et diagnostic fuite / sanitaires", 1, "forfait", 69);
+    push("Localisation et accès à la fuite", 1, "forfait", 45);
+    push("Fourniture joints / robinetterie / pièces sanitaires", 1, "forfait", 58);
+    push("Main d'œuvre réparation plomberie", 1.5, "h", 62);
+    push("Essai d'étanchéité et remise en service", 1, "forfait", 35);
+  } else if (
+    desc.includes("chaudière") ||
+    desc.includes("radiateur") ||
+    desc.includes("chauffage") ||
+    desc.includes("plancher chauffant")
+  ) {
+    push("Diagnostic chaudière / circuit de chauffage", 1, "forfait", 95);
+    push("Fourniture pièces détachées chauffage", 1, "forfait", 125);
+    push("Intervention technicien chauffage", 2, "h", 72);
+    push("Purge, équilibrage et contrôle combustion", 1, "forfait", 58);
+    push("Nettoyage filtre / vase d'expansion (si applicable)", 1, "forfait", 40);
+  } else if (
+    desc.includes("salle de bain") ||
+    desc.includes("sdb") ||
+    desc.includes("douche") ||
+    desc.includes("baignoire")
+  ) {
+    push("Déplacement et étude technique salle de bain", 1, "forfait", 75);
+    push("Dépose ancien appareil sanitaire", 1, "forfait", 95);
+    push("Fourniture et pose mitigeur / robinetterie", 1, "forfait", 180);
+    push("Raccordements évacuation et alimentation", 1, "forfait", 220);
+    push("Étanchéité et finitions plomberie", 1, "forfait", 110);
+    push("Mise en service et essai", 1, "forfait", 45);
   } else {
-    push("Déplacement et diagnostic", 1, "forfait", 69);
-    push("Main d'œuvre plomberie", 2, "h", 65);
-    push("Fournitures diverses", 1, "forfait", 48);
+    push("Déplacement et diagnostic plomberie", 1, "forfait", 69);
+    push("Main d'œuvre plomberie / chauffage", 2, "h", 62);
+    push("Fournitures et consommables", 1, "forfait", 48);
+    push("Essais et remise en service", 1, "forfait", 35);
   }
 
   return items;
 }
 
-async function openaiLineItems(job: Job): Promise<QuoteLineItem[] | null> {
+type OpenAiMeta = {
+  title?: string;
+  intro?: string;
+  notes?: string;
+};
+
+async function openaiLineItems(
+  job: Job,
+  artisan: Artisan | undefined,
+  defaultTva: number,
+  tutoiement: boolean
+): Promise<{ items: QuoteLineItem[]; meta: OpenAiMeta } | null> {
   const key = process.env.OPENAI_API_KEY;
   if (!key) return null;
 
   try {
     const OpenAI = (await import("openai")).default;
     const client = new OpenAI({ apiKey: key });
+    const tutoiementHint = tutoiement
+      ? "Tutoye le client (tu/toi) dans l'intro."
+      : "Vouvoie le client (vous) dans l'intro.";
     const completion = await client.chat.completions.create({
       model: process.env.OPENAI_MODEL || "gpt-4o-mini",
       response_format: { type: "json_object" },
       messages: [
         {
           role: "system",
-          content:
-            "Tu es un assistant devis pour artisans plombiers/chauffagistes en France. Réponds en JSON: {\"title\":\"...\",\"intro\":\"...\",\"notes\":\"...\",\"line_items\":[{\"label\":\"...\",\"quantity\":1,\"unit\":\"forfait|h|u\",\"unit_price_ht\":0,\"tva_rate\":10}]}. Prix réalistes HT, TVA 10% rénovation. Jamais envoyer au client.",
+          content: `Tu es un assistant devis pour artisans plombiers/chauffagistes en France. Réponds en JSON: {"title":"...","intro":"...","notes":"...","line_items":[{"label":"...","quantity":1,"unit":"forfait|h|u","unit_price_ht":0,"tva_rate":${defaultTva}}]}. Prix de base HT réalistes (avant marge artisan). TVA ${defaultTva}% par défaut. ${tutoiementHint} Jamais envoyer au client.`,
         },
         {
           role: "user",
-          content: `Client: ${job.client_name}\nAdresse: ${job.client_address || "n/c"}\nDescription chantier: ${job.description}`,
+          content: `Artisan: ${artisan?.company_name || artisan?.name || "n/c"}\nClient: ${job.client_name}\nAdresse: ${job.client_address || "n/c"}\nDescription chantier: ${job.description}`,
         },
       ],
     });
 
     const raw = completion.choices[0]?.message?.content;
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as {
-      title?: string;
-      intro?: string;
-      notes?: string;
+    const parsed = JSON.parse(raw) as OpenAiMeta & {
       line_items?: Array<{
         label: string;
         quantity: number;
@@ -104,21 +170,36 @@ async function openaiLineItems(job: Job): Promise<QuoteLineItem[] | null> {
     };
     if (!parsed.line_items?.length) return null;
 
-    // stash meta on globalThis-like return via side channel
-    (openaiLineItems as unknown as { _meta?: typeof parsed })._meta = parsed;
-
-    return parsed.line_items.map((li) => ({
-      id: randomUUID(),
-      label: li.label,
-      quantity: Number(li.quantity) || 1,
-      unit: li.unit || "forfait",
-      unit_price_ht: Number(li.unit_price_ht) || 0,
-      tva_rate: Number(li.tva_rate ?? 10),
-    }));
+    return {
+      meta: {
+        title: parsed.title,
+        intro: parsed.intro,
+        notes: parsed.notes,
+      },
+      items: parsed.line_items.map((li) => ({
+        id: randomUUID(),
+        label: li.label,
+        quantity: Number(li.quantity) || 1,
+        unit: li.unit || "forfait",
+        unit_price_ht: Number(li.unit_price_ht) || 0,
+        tva_rate: Number(li.tva_rate ?? defaultTva),
+      })),
+    };
   } catch (err) {
     console.error("OpenAI draft failed, falling back to mock", err);
     return null;
   }
+}
+
+function inferTitle(job: Job, metaTitle?: string): string {
+  if (metaTitle) return metaTitle;
+  const d = job.description.toLowerCase();
+  let suffix = "";
+  if (d.includes("chauffe") || d.includes("ballon")) suffix = " — Remplacement chauffe-eau";
+  else if (d.includes("fuite")) suffix = " — Réparation fuite";
+  else if (d.includes("chaudière") || d.includes("chauffage")) suffix = " — Intervention chauffage";
+  else if (d.includes("douche") || d.includes("salle de bain")) suffix = " — Salle de bain";
+  return `Devis — ${job.client_name}${suffix}`;
 }
 
 export async function generateDraftForJob(jobId: string): Promise<{
@@ -128,29 +209,50 @@ export async function generateDraftForJob(jobId: string): Promise<{
   const job = await db.getJob(jobId);
   if (!job) throw new Error("Job introuvable");
 
+  const artisan = job.artisan;
+  const prefs = artisanDefaults(artisan || ({ tutoiement: false } as Artisan));
+
   await db.updateJobStatus(jobId, "processing");
 
-  let lineItems = await openaiLineItems(job);
-  const meta = (openaiLineItems as unknown as { _meta?: { title?: string; intro?: string; notes?: string } })._meta;
-  if (!lineItems) {
-    lineItems = mockLineItems(job);
-  }
+  // Enrich description with photo notes if any
+  const assets = await db.getAssetsForJob(jobId);
+  const photoNotes = assets
+    .filter((a) => a.note || a.kind === "photo" || a.kind === "note")
+    .map((a) => a.note)
+    .filter(Boolean);
+  const enrichedJob: Job = {
+    ...job,
+    description:
+      photoNotes.length > 0
+        ? `${job.description}\n\n[Notes photos / chantier]\n${photoNotes.join("\n")}`
+        : job.description,
+  };
+
+  const ai = await openaiLineItems(
+    enrichedJob,
+    artisan,
+    prefs.default_tva,
+    prefs.tutoiement
+  );
+  let lineItems = ai?.items ?? mockLineItems(enrichedJob, prefs.default_tva);
+  const meta = ai?.meta;
+
+  lineItems = applyDefaultTva(lineItems, prefs.default_tva);
+  lineItems = applyMarge(lineItems, prefs.marge_pct);
 
   const sums = totals(lineItems);
-  const title =
-    meta?.title ||
-    `Devis — ${job.client_name}${job.description.toLowerCase().includes("chauffe") ? " — Remplacement chauffe-eau" : ""}`;
+  const title = inferTitle(enrichedJob, meta?.title);
+  const intro =
+    meta?.intro || buildIntro(enrichedJob, artisan, prefs.tutoiement);
 
   const draft = await db.saveDraft({
     job_id: jobId,
     title,
-    intro:
-      meta?.intro ||
-      `Madame, Monsieur,\n\nSuite à votre demande concernant « ${job.description.slice(0, 120)} », voici un brouillon de devis à valider avant envoi au client.`,
+    intro,
     line_items: lineItems,
     notes:
       meta?.notes ||
-      "Brouillon généré par jingr. À vérifier et ajuster avant envoi. Ne jamais envoyer automatiquement.",
+      `Brouillon généré par jingr (marge ${prefs.marge_pct} %, TVA ${prefs.default_tva} %). À vérifier et ajuster avant envoi. Ne jamais envoyer automatiquement au client.`,
     total_ht: sums.total_ht,
     total_tva: sums.total_tva,
     total_ttc: sums.total_ttc,
@@ -160,7 +262,12 @@ export async function generateDraftForJob(jobId: string): Promise<{
   await db.addEvent({
     quote_draft_id: draft.id,
     event_type: "draft_generated",
-    payload: { source: process.env.OPENAI_API_KEY ? "openai_or_mock" : "mock" },
+    payload: {
+      source: process.env.OPENAI_API_KEY ? "openai_or_mock" : "mock",
+      marge_pct: prefs.marge_pct,
+      default_tva: prefs.default_tva,
+      tutoiement: prefs.tutoiement,
+    },
   });
 
   const token = await db.createReviewToken({

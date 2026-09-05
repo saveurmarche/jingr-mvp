@@ -11,3 +11,9 @@ npm-debug.log*
 !/data/.gitkeep
 .vercel
 *.tsbuildinfo
+
+# Uploaded chantier photos (keep .gitkeep)
+/public/uploads/*
+!/public/uploads/.gitkeep
+/data/uploads/*
+!/data/uploads/.gitkeep

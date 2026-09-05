@@ -21,7 +21,10 @@ export default function RootLayout({
             </Link>
             <nav className="flex gap-3 text-sm">
               <Link href="/go" className="text-stone-600 hover:text-[#6B4EFF]">
-                Envoyer un chantier
+                Chantier
+              </Link>
+              <Link href="/mes-devis" className="text-stone-600 hover:text-[#6B4EFF]">
+                Mes devis
               </Link>
               <Link href="/ops" className="text-stone-400 hover:text-stone-600">
                 Ops

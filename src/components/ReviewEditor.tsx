@@ -23,16 +23,28 @@ function recalc(items: QuoteLineItem[]) {
   return { total_ht, total_tva, total_ttc: Math.round((total_ht + total_tva) * 100) / 100 };
 }
 
+function whatsappShareUrl(token: string, clientName: string) {
+  const origin =
+    typeof window !== "undefined" ? window.location.origin : "https://jingr.app";
+  const reviewUrl = `${origin}/review/${token}`;
+  const text =
+    `Brouillon jingr à valider (pas encore envoyé au client) — ${clientName}.\n` +
+    `Relisez ce devis avant toute transmission : ${reviewUrl}`;
+  return `https://wa.me/?text=${encodeURIComponent(text)}`;
+}
+
 export function ReviewEditor({
   token,
   draftId,
   initialDraft,
   jobDescription,
+  clientName,
 }: {
   token: string;
   draftId: string;
   initialDraft: QuoteDraft;
   jobDescription: string;
+  clientName: string;
 }) {
   const [title, setTitle] = useState(initialDraft.title);
   const [intro, setIntro] = useState(initialDraft.intro || "");
@@ -43,6 +55,10 @@ export function ReviewEditor({
   const [busy, setBusy] = useState(false);
 
   const sums = useMemo(() => recalc(items), [items]);
+  const waUrl = useMemo(
+    () => whatsappShareUrl(token, clientName),
+    [token, clientName]
+  );
 
   function updateItem(id: string, patch: Partial<QuoteLineItem>) {
     setItems((prev) => prev.map((i) => (i.id === id ? { ...i, ...patch } : i)));
@@ -96,7 +112,7 @@ export function ReviewEditor({
     <div className="space-y-4">
       <div className="card space-y-3">
         <p className="text-sm text-stone-500">Chantier reçu</p>
-        <p className="text-stone-800">{jobDescription}</p>
+        <p className="text-stone-800 whitespace-pre-wrap">{jobDescription}</p>
       </div>
 
       <div className="card space-y-4">
@@ -176,7 +192,21 @@ export function ReviewEditor({
           <a className="btn-secondary" href={`/api/pdf/${token}`}>
             Télécharger PDF
           </a>
+          <a
+            className="btn-secondary"
+            href={waUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Partager le lien du brouillon (à valider — pas un envoi client final)"
+          >
+            WhatsApp (brouillon)
+          </a>
         </div>
+
+        <p className="text-xs text-stone-500">
+          Le bouton WhatsApp partage le lien de revue pour vous (ou un collègue).
+          Ce n&apos;est pas un envoi du devis final au client.
+        </p>
 
         {msg ? <p className="text-sm text-stone-700">{msg}</p> : null}
         {status === "validated" ? (

@@ -13,6 +13,11 @@ async function main() {
     phone: "0612345678",
     trade: "plomberie",
     company_name: "Martin Plomberie Chauffage",
+    tutoiement: false,
+    marge_pct: 30,
+    default_tva: 10,
+    siret: "12345678900012",
+    city: "Lyon",
   });
 
   const job = await db.createJob({
@@ -37,7 +42,9 @@ async function main() {
   console.log("Seed OK -- Mme Dupont chauffe-eau");
   console.log("Job:", job.id);
   console.log("Draft:", draft.id, "TTC:", draft.total_ttc);
+  console.log("Marge appliquée: 30%, TVA: 10%");
   console.log("Review URL: /review/" + reviewToken);
+  console.log("Mes devis: /mes-devis (tél. 0612345678)");
   console.log("DB mode:", db.mode());
 }
 

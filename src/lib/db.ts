@@ -51,12 +51,16 @@ function nowIso() {
   return new Date().toISOString();
 }
 
+function normalizePhone(phone: string) {
+  return phone.replace(/\s+/g, "");
+}
+
 export const db = {
   mode(): "supabase" | "file" {
     return hasSupabaseConfig() ? "supabase" : "file";
   },
 
-  async listJobs(): Promise<(Job & { artisan?: Artisan; draft?: QuoteDraft })[]> {
+  async listJobs(): Promise<(Job & { artisan?: Artisan; draft?: QuoteDraft; review_token?: string })[]> {
     if (hasSupabaseConfig()) {
       // Production path: wire Supabase client when env is set.
       // For MVP demo we fall through to file store if not fully configured.
@@ -69,7 +73,18 @@ export const db = {
         ...job,
         artisan: store.artisans.find((a) => a.id === job.artisan_id),
         draft: store.quote_drafts.find((d) => d.job_id === job.id),
+        review_token: store.review_tokens.find((t) => t.job_id === job.id)?.token,
       }));
+  },
+
+  async listJobsByPhone(phone: string): Promise<
+    (Job & { artisan?: Artisan; draft?: QuoteDraft; review_token?: string })[]
+  > {
+    const normalized = normalizePhone(phone);
+    const all = await this.listJobs();
+    return all.filter(
+      (j) => j.artisan && normalizePhone(j.artisan.phone) === normalized
+    );
   },
 
   async getJob(id: string): Promise<(Job & { artisan?: Artisan }) | null> {
@@ -82,16 +97,26 @@ export const db = {
     };
   },
 
+  async getAssetsForJob(jobId: string): Promise<JobAsset[]> {
+    const store = await readStore();
+    return store.job_assets.filter((a) => a.job_id === jobId);
+  },
+
   async findOrCreateArtisan(input: {
     name: string;
     phone: string;
     trade?: string;
     email?: string;
     company_name?: string;
+    tutoiement?: boolean;
+    marge_pct?: number;
+    default_tva?: number;
+    siret?: string;
+    city?: string;
   }): Promise<Artisan> {
     const store = await readStore();
-    const phone = input.phone.replace(/\s+/g, "");
-    let artisan = store.artisans.find((a) => a.phone.replace(/\s+/g, "") === phone);
+    const phone = normalizePhone(input.phone);
+    let artisan = store.artisans.find((a) => normalizePhone(a.phone) === phone);
     if (!artisan) {
       artisan = {
         id: randomUUID(),
@@ -100,11 +125,57 @@ export const db = {
         email: input.email ?? null,
         trade: input.trade ?? "plomberie",
         company_name: input.company_name ?? null,
+        tutoiement: input.tutoiement ?? false,
+        marge_pct: input.marge_pct ?? 30,
+        default_tva: input.default_tva ?? 10,
+        siret: input.siret ?? null,
+        city: input.city ?? null,
         created_at: nowIso(),
       };
       store.artisans.push(artisan);
       await writeStore(store);
+      return artisan;
     }
+
+    // Update profile / prefs when provided
+    let changed = false;
+    if (input.name && input.name !== artisan.name) {
+      artisan.name = input.name;
+      changed = true;
+    }
+    if (input.trade) {
+      artisan.trade = input.trade;
+      changed = true;
+    }
+    if (input.email !== undefined) {
+      artisan.email = input.email;
+      changed = true;
+    }
+    if (input.company_name !== undefined) {
+      artisan.company_name = input.company_name || null;
+      changed = true;
+    }
+    if (input.tutoiement !== undefined) {
+      artisan.tutoiement = input.tutoiement;
+      changed = true;
+    }
+    if (input.marge_pct !== undefined) {
+      artisan.marge_pct = input.marge_pct;
+      changed = true;
+    }
+    if (input.default_tva !== undefined) {
+      artisan.default_tva = input.default_tva;
+      changed = true;
+    }
+    if (input.siret !== undefined) {
+      artisan.siret = input.siret || null;
+      changed = true;
+    }
+    if (input.city !== undefined) {
+      artisan.city = input.city || null;
+      changed = true;
+    }
+    if (changed) await writeStore(store);
     return artisan;
   },
 

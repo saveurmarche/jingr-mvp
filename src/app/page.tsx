@@ -20,17 +20,17 @@ export default function HomePage() {
           <Link href="/go" className="btn-primary inline-block">
             Commencer → /go
           </Link>
-          <Link href="/ops" className="btn-secondary inline-block">
-            Accès ops
+          <Link href="/mes-devis" className="btn-secondary inline-block">
+            Mes devis
           </Link>
         </div>
       </section>
 
       <section className="grid gap-4 sm:grid-cols-3">
         {[
-          ["1. Chantier", "Texte, WhatsApp ou formulaire mobile."],
-          ["2. Brouillon", "Lignes plomberie/chauffage, totaux HT/TTC."],
-          ["3. Validation", "Vous corrigez, validez, téléchargez le PDF."],
+          ["1. Chantier", "Texte, photos de notes, WhatsApp ou formulaire."],
+          ["2. Brouillon", "Lignes plomberie, marge, TVA, totaux HT/TTC."],
+          ["3. Validation", "Vous corrigez, validez, PDF ou lien WhatsApp."],
         ].map(([t, d]) => (
           <div key={t} className="card">
             <h2 className="font-semibold text-[#6B4EFF]">{t}</h2>

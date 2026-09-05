@@ -31,6 +31,7 @@ export default async function ReviewPage({
         draftId={data.draft.id}
         initialDraft={data.draft}
         jobDescription={data.job.description}
+        clientName={data.job.client_name}
       />
     </div>
   );
