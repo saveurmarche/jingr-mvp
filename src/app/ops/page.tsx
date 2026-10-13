@@ -31,6 +31,7 @@ export default function OpsPage() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [testimonials, setTestimonials] = useState<TestimonialRow[]>([]);
   const [pilot, setPilot] = useState<PilotMetrics | null>(null);
+  const [pioneerPay, setPioneerPay] = useState<{ phone: string; at: string }[]>([]);
   const [deletions, setDeletions] = useState<{ phone: string; at: string }[]>([]);
   const [beta, setBeta] = useState<
     { id: string; first_name: string; last_name?: string | null; email: string; trade?: string | null; phone?: string | null; message?: string | null; software?: string | null; created_at: string }[]
@@ -50,6 +51,7 @@ export default function OpsPage() {
       setDeletions(tJson.deletion_requests ?? []);
       setBeta(tJson.beta_signups ?? []);
       setPilot(tJson.pilot ?? null);
+      setPioneerPay(tJson.pioneer_payments ?? []);
     }
   }, [password]);
 
@@ -129,6 +131,17 @@ export default function OpsPage() {
   return (
     <div className="space-y-6">
       {pilot ? <PilotCard m={pilot} /> : null}
+
+      {pioneerPay.length ? (
+        <section className="card space-y-2 border-amber-200">
+          <h1 className="text-lg font-bold text-amber-800">Pionniers à qui envoyer le lien de paiement à prix pionnier</h1>
+          {pioneerPay.map((d) => (
+            <p key={d.phone + d.at} className="text-sm">
+              {d.phone} — {new Date(d.at).toLocaleDateString("fr-FR")}
+            </p>
+          ))}
+        </section>
+      ) : null}
 
       {deletions.length ? (
         <section className="card space-y-2 border-red-200">

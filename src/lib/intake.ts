@@ -203,13 +203,27 @@ export async function handleIncoming(msg: IncomingMessage): Promise<IntakeResult
   // Les pionniers (premiers artisans inscrits) ont leur propre lien au prix pionnier, s'il est configuré.
   const pioneerSpots = Number(process.env.PIONEER_SPOTS || 10);
   const isPioneer = (await db.artisanRank(artisan.id)) <= pioneerSpots;
-  const payLink =
-    (isPioneer && process.env.NEXT_PUBLIC_STRIPE_PIONEER_LINK) || process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK;
-  if (count === FREE_DRAFTS && payLink) {
-    lines.push(
-      "",
-      `Vous avez utilisé vos ${FREE_DRAFTS} devis offerts. Pour continuer sans limite : ${payLink}`
-    );
+  // Un pionnier ne reçoit jamais le lien au prix normal : sans lien pionnier configuré,
+  // on lui annonce son lien à prix pionnier et l'équipe est prévenue (/ops).
+  const payLink = isPioneer
+    ? process.env.NEXT_PUBLIC_STRIPE_PIONEER_LINK
+    : process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK;
+  if (count === FREE_DRAFTS) {
+    if (payLink) {
+      lines.push("", `Vous avez utilisé vos ${FREE_DRAFTS} devis offerts. Pour continuer sans limite : ${payLink}`);
+    } else if (isPioneer) {
+      const pioneerPrice = process.env.NEXT_PUBLIC_PIONEER_PRICE || "39";
+      lines.push(
+        "",
+        `Vous avez utilisé vos ${FREE_DRAFTS} devis offerts. Vous êtes pionnier : on vous envoie sous 24 h votre lien à ${pioneerPrice} € HT / mois à vie. Continuez à faire vos devis en attendant.`
+      );
+      await db.inboxInsert({
+        channel: msg.channel,
+        from_phone: msg.from,
+        body: "Pionnier arrivé au bout des devis offerts : lui envoyer le lien de paiement pionnier.",
+        raw: { kind: "pioneer_payment_pending", artisan_id: artisan.id },
+      });
+    }
   }
 
   return {

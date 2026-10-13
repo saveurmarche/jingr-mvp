@@ -11,12 +11,14 @@ function unauthorized() {
 export async function GET(req: NextRequest) {
   if (!checkOpsPassword(req.headers.get("x-ops-password"))) return unauthorized();
   const deletions = await db.listInboxByKind("deletion_request");
+  const pioneers = await db.listInboxByKind("pioneer_payment_pending");
   return NextResponse.json({
     ok: true,
     testimonials: await db.listTestimonials(),
     deletion_requests: deletions.map((d) => ({ phone: d.from_phone, at: d.created_at })),
     beta_signups: await db.listBetaSignups(),
     pilot: pilotMetrics(await db.snapshot()),
+    pioneer_payments: pioneers.map((d) => ({ phone: d.from_phone, at: d.created_at })),
   });
 }
 
