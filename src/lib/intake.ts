@@ -27,6 +27,7 @@ export function appUrl(): string {
 }
 
 const FREE_DRAFTS = Number(process.env.FREE_DRAFTS || 10);
+const PIONEER_TRIAL_DAYS = 90;
 const REFERRAL_AT = 3;
 const TESTIMONIAL_AT = 5;
 const TESTIMONIAL_RE = /^\s*avis\s*[:：-]?\s*/i;
@@ -200,27 +201,33 @@ export async function handleIncoming(msg: IncomingMessage): Promise<IntakeResult
       "Déjà 5 devis 💪 Une phrase sur jingr pour aider d'autres artisans ? Répondez « AVIS : » suivi de votre avis (publié avec votre prénom et votre métier)."
     );
   }
-  // Les pionniers (premiers artisans inscrits) ont leur propre lien au prix pionnier, s'il est configuré.
+  // Passage au payant, proposé une seule fois :
+  // - pionniers (les PIONEER_SPOTS premiers inscrits) : à la fin des 3 mois offerts, au prix pionnier ;
+  // - autres artisans : après FREE_DRAFTS devis, au prix normal.
+  // Un pionnier ne reçoit jamais le lien au prix normal.
   const pioneerSpots = Number(process.env.PIONEER_SPOTS || 10);
   const isPioneer = (await db.artisanRank(artisan.id)) <= pioneerSpots;
-  // Un pionnier ne reçoit jamais le lien au prix normal : sans lien pionnier configuré,
-  // on lui annonce son lien à prix pionnier et l'équipe est prévenue (/ops).
-  const payLink = isPioneer
-    ? process.env.NEXT_PUBLIC_STRIPE_PIONEER_LINK
-    : process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK;
-  if (count === FREE_DRAFTS) {
+  const trialOver = isPioneer
+    ? Date.now() - new Date(artisan.created_at).getTime() >= PIONEER_TRIAL_DAYS * 86_400_000
+    : count >= FREE_DRAFTS;
+  if (trialOver && !artisan.billing_notified_at) {
+    const payLink = isPioneer
+      ? process.env.NEXT_PUBLIC_STRIPE_PIONEER_LINK
+      : process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK;
+    const pioneerPrice = process.env.NEXT_PUBLIC_PIONEER_PRICE || "39";
+    const intro = isPioneer
+      ? `Vos 3 mois offerts sont terminés : merci d'avoir testé jingr avec nous 🙏 En tant que pionnier, vous gardez ${pioneerPrice} € HT / mois à vie.`
+      : `Vous avez utilisé vos ${FREE_DRAFTS} devis offerts.`;
     if (payLink) {
-      lines.push("", `Vous avez utilisé vos ${FREE_DRAFTS} devis offerts. Pour continuer sans limite : ${payLink}`);
+      lines.push("", `${intro} Pour continuer : ${payLink}`);
+      await db.updateArtisan(artisan.id, { billing_notified_at: new Date().toISOString() });
     } else if (isPioneer) {
-      const pioneerPrice = process.env.NEXT_PUBLIC_PIONEER_PRICE || "39";
-      lines.push(
-        "",
-        `Vous avez utilisé vos ${FREE_DRAFTS} devis offerts. Vous êtes pionnier : on vous envoie sous 24 h votre lien à ${pioneerPrice} € HT / mois à vie. Continuez à faire vos devis en attendant.`
-      );
+      lines.push("", `${intro} On vous envoie votre lien sous 24 h ; continuez vos devis en attendant.`);
+      await db.updateArtisan(artisan.id, { billing_notified_at: new Date().toISOString() });
       await db.inboxInsert({
         channel: msg.channel,
         from_phone: msg.from,
-        body: "Pionnier arrivé au bout des devis offerts : lui envoyer le lien de paiement pionnier.",
+        body: "Pionnier en fin de période offerte : lui envoyer le lien de paiement pionnier.",
         raw: { kind: "pioneer_payment_pending", artisan_id: artisan.id },
       });
     }

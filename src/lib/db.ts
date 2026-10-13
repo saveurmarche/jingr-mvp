@@ -256,7 +256,7 @@ export const db = {
 
   async updateArtisan(
     id: string,
-    patch: Partial<Pick<Artisan, "paused" | "price_list">>
+    patch: Partial<Pick<Artisan, "paused" | "price_list" | "billing_notified_at">>
   ): Promise<Artisan | null> {
     const store = await readStore();
     const artisan = store.artisans.find((a) => a.id === id);

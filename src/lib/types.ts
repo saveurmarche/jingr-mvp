@@ -25,6 +25,8 @@ export type Artisan = {
   price_list?: PriceItem[];
   /** STOP : l'agent ne traite plus ses messages jusqu'à REPRENDRE */
   paused?: boolean;
+  /** Date à laquelle on lui a proposé de passer au payant (une seule fois) */
+  billing_notified_at?: string | null;
   created_at: string;
 };
 
