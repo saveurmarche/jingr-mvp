@@ -10,6 +10,7 @@ const schema = z.object({
   phone: z.string().trim().max(30).optional(),
   city: z.string().trim().max(80).optional(),
   message: z.string().trim().max(1500).optional(),
+  software: z.string().trim().max(80).optional(),
   // Champ piège invisible : rempli = robot
   website: z.string().max(0).optional(),
 });
@@ -26,6 +27,7 @@ export async function POST(req: NextRequest) {
       phone: data.phone || null,
       city: data.city || null,
       message: data.message || null,
+      software: data.software || null,
     });
     return NextResponse.json({
       ok: true,

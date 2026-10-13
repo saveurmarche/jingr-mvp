@@ -31,7 +31,7 @@ export default function OpsPage() {
   const [testimonials, setTestimonials] = useState<TestimonialRow[]>([]);
   const [deletions, setDeletions] = useState<{ phone: string; at: string }[]>([]);
   const [beta, setBeta] = useState<
-    { id: string; first_name: string; last_name?: string | null; email: string; trade?: string | null; phone?: string | null; message?: string | null; created_at: string }[]
+    { id: string; first_name: string; last_name?: string | null; email: string; trade?: string | null; phone?: string | null; message?: string | null; software?: string | null; created_at: string }[]
   >([]);
 
   const load = useCallback(async () => {
@@ -147,6 +147,7 @@ export default function OpsPage() {
             <div key={b.id} className="card space-y-1 text-sm">
               <p className="font-semibold">
                 {b.first_name} {b.last_name ?? ""} · {b.trade || "métier ?"}
+                {b.software ? ` · outil : ${b.software}` : ""}
               </p>
               <p>
                 <a className="text-[#7b5ea7] underline" href={`mailto:${b.email}`}>{b.email}</a>

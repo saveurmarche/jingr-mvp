@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { SOFTWARE_OPTIONS } from "@/lib/billing-software";
 
 export function BetaForm() {
   const [state, setState] = useState<{ ok: boolean; msg: string } | null>(null);
@@ -39,6 +40,12 @@ export function BetaForm() {
       <input className="input" name="email" type="email" placeholder="votre@email.fr *" required autoComplete="email" />
       <input className="input" name="trade" placeholder="Métier (ex : plombier, chauffagiste…)" />
       <input className="input" name="phone" type="tel" placeholder="Téléphone (optionnel)" autoComplete="tel" />
+      <select className="input" name="software" defaultValue="">
+        <option value="">Vos devis et factures aujourd&apos;hui ?</option>
+        {SOFTWARE_OPTIONS.map((o) => (
+          <option key={o} value={o}>{o}</option>
+        ))}
+      </select>
       <textarea
         className="input min-h-28"
         name="message"

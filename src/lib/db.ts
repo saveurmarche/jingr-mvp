@@ -129,6 +129,7 @@ export const db = {
     city?: string;
     address?: string;
     tva_franchise?: boolean;
+    billing_software?: string | null;
   }): Promise<Artisan> {
     const store = await readStore();
     const phone = normalizePhone(input.phone);
@@ -199,6 +200,10 @@ export const db = {
     }
     if (input.tva_franchise !== undefined) {
       artisan.tva_franchise = input.tva_franchise;
+      changed = true;
+    }
+    if (input.billing_software !== undefined) {
+      artisan.billing_software = input.billing_software || null;
       changed = true;
     }
     if (changed) await writeStore(store);

@@ -13,6 +13,7 @@ const schema = z.object({
   default_tva: z.union([z.literal(10), z.literal(20), z.literal(5.5)]).optional(),
   tva_franchise: z.boolean().optional(),
   tutoiement: z.boolean().optional(),
+  billing_software: z.string().max(60).nullable().optional(),
 });
 
 export async function POST(req: NextRequest) {

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { Artisan, Invoice, QuoteDraft, QuoteLineItem } from "@/lib/types";
+import { SOFTWARE_OPTIONS, invoicesInJingr } from "@/lib/billing-software";
 
 function eur(n: number) {
   return new Intl.NumberFormat("fr-FR", {
@@ -62,6 +63,7 @@ export function ReviewEditor({
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [invoice, setInvoice] = useState<Invoice | null>(initialInvoice);
+  const [billing, setBilling] = useState<string | null>(artisan?.billing_software ?? null);
 
   const sums = useMemo(() => recalc(items), [items]);
   const waUrl = useMemo(
@@ -139,7 +141,7 @@ export function ReviewEditor({
 
   return (
     <div className="space-y-4">
-      {artisan ? <CompanySettings token={token} artisan={artisan} /> : null}
+      {artisan ? <CompanySettings token={token} artisan={artisan} onBillingChange={setBilling} /> : null}
 
       <div className="card space-y-3">
         <p className="text-sm text-stone-500">Chantier reçu</p>
@@ -225,6 +227,13 @@ export function ReviewEditor({
           </a>
           <a
             className="btn-secondary"
+            href={`/api/export/${token}`}
+            title="Lignes du devis au format Excel/CSV, à importer dans votre logiciel"
+          >
+            Export CSV
+          </a>
+          <a
+            className="btn-secondary"
             href={waUrl}
             target="_blank"
             rel="noopener noreferrer"
@@ -250,7 +259,21 @@ export function ReviewEditor({
           />
         ) : null}
 
-        {status === "validated" ? (
+        {status === "validated" && !invoicesInJingr(billing) && !invoice ? (
+          <div className="rounded-xl border border-[#c4b5fd] bg-[#faf8ff] p-4 space-y-3">
+            <p className="font-semibold text-[#7b5ea7]">Facturation avec {billing}</p>
+            <p className="text-sm text-stone-600">
+              Vous facturez avec votre logiciel : récupérez les lignes du devis (CSV, ouvrable dans Excel)
+              et importez-les comme articles, ou joignez le PDF. Rien à ressaisir.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <a className="btn-primary" href={`/api/export/${token}`}>Exporter les lignes (CSV)</a>
+              <a className="btn-secondary" href={`/api/pdf/${token}`}>Télécharger le PDF</a>
+            </div>
+          </div>
+        ) : null}
+
+        {status === "validated" && (invoicesInJingr(billing) || invoice) ? (
           <div className="rounded-xl border border-[#c4b5fd] bg-[#faf8ff] p-4 space-y-3">
             <p className="font-semibold text-[#7b5ea7]">Facturation</p>
             {invoice ? (
@@ -295,7 +318,15 @@ export function ReviewEditor({
   );
 }
 
-function CompanySettings({ token, artisan }: { token: string; artisan: Artisan }) {
+function CompanySettings({
+  token,
+  artisan,
+  onBillingChange,
+}: {
+  token: string;
+  artisan: Artisan;
+  onBillingChange: (v: string | null) => void;
+}) {
   const incomplete = !artisan.siret || !(artisan.address || artisan.city);
   const [open, setOpen] = useState(incomplete);
   const [form, setForm] = useState({
@@ -305,6 +336,7 @@ function CompanySettings({ token, artisan }: { token: string; artisan: Artisan }
     marge_pct: artisan.marge_pct ?? 30,
     default_tva: artisan.default_tva ?? 10,
     tva_franchise: artisan.tva_franchise ?? false,
+    billing_software: artisan.billing_software ?? "jingr",
   });
   const [saved, setSaved] = useState<string | null>(null);
 
@@ -316,6 +348,7 @@ function CompanySettings({ token, artisan }: { token: string; artisan: Artisan }
       body: JSON.stringify({ token, ...form }),
     });
     const json = await res.json();
+    if (json.ok) onBillingChange(form.billing_software === "jingr" ? null : form.billing_software);
     setSaved(json.ok ? "Enregistré — appliqué à vos prochains devis et factures." : json.error || "Erreur");
   }
 
@@ -357,6 +390,16 @@ function CompanySettings({ token, artisan }: { token: string; artisan: Artisan }
             <input type="checkbox" checked={form.tva_franchise}
               onChange={(e) => setForm({ ...form, tva_franchise: e.target.checked })} />
             Micro-entreprise en franchise de TVA (art. 293 B du CGI)
+          </label>
+          <label className="text-sm text-stone-600 sm:col-span-2">
+            Je fais mes factures avec
+            <select className="input mt-1" value={form.billing_software}
+              onChange={(e) => setForm({ ...form, billing_software: e.target.value })}>
+              <option value="jingr">jingr (facture en un clic depuis le devis)</option>
+              {SOFTWARE_OPTIONS.map((o) => (
+                <option key={o} value={o}>{o}</option>
+              ))}
+            </select>
           </label>
           <div className="sm:col-span-2 flex items-center gap-3">
             <button type="button" className="btn-primary" onClick={submit}>Enregistrer</button>

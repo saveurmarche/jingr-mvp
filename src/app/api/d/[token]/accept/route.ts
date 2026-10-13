@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { appUrl } from "@/lib/intake";
 import { sendText } from "@/lib/whatsapp";
+import { invoicesInJingr } from "@/lib/billing-software";
 
 const schema = z.object({
   name: z.string().trim().min(2).max(120),
@@ -28,7 +29,11 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ token: str
           data.artisan.phone,
           [
             `🎉 ${name} a accepté votre devis « ${data.draft.title} » (${eur(data.draft.total_ttc)} TTC).`,
-            review ? `Chantier terminé ? Facturez en un clic : ${appUrl()}/review/${review.token}` : "",
+            review
+              ? invoicesInJingr(data.artisan.billing_software)
+                ? `Chantier terminé ? Facturez en un clic : ${appUrl()}/review/${review.token}`
+                : `Lignes à importer dans ${data.artisan.billing_software} (CSV) : ${appUrl()}/api/export/${review.token}`
+              : "",
           ]
             .filter(Boolean)
             .join("\n")

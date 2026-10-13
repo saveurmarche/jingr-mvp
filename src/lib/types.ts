@@ -19,6 +19,8 @@ export type Artisan = {
   tva_franchise?: boolean;
   /** Délai de paiement des factures, en jours (défaut 30) */
   payment_days?: number;
+  /** Logiciel de facturation déjà utilisé (null / "jingr" = facture dans jingr) */
+  billing_software?: string | null;
   created_at: string;
 };
 
@@ -126,6 +128,8 @@ export type BetaSignup = {
   phone?: string | null;
   message?: string | null;
   city?: string | null;
+  /** Logiciel de devis/facturation actuel déclaré */
+  software?: string | null;
   created_at: string;
 };
 
