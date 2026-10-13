@@ -140,7 +140,7 @@ export const db = {
         name: input.name,
         phone: input.phone,
         email: input.email ?? null,
-        trade: input.trade ?? "plomberie",
+        trade: input.trade ?? "bâtiment",
         company_name: input.company_name ?? null,
         tutoiement: input.tutoiement ?? false,
         marge_pct: input.marge_pct ?? 30,

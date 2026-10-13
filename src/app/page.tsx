@@ -18,7 +18,7 @@ const ticker = [
   "Votre ton · votre validation",
   "Acceptation en ligne",
   "Facture en un clic",
-  "Plombiers & chauffagistes",
+  "Plombiers · électriciens · chauffagistes",
   "Basé à Lille",
 ];
 
@@ -122,7 +122,7 @@ export default async function HomePage() {
         <div className="orb left-[-6rem] top-40 h-72 w-72 bg-[#e6dcf5]" />
         <div className="orb right-[8%] top-24 h-64 w-64 bg-[#f6e6d3] opacity-70" />
         <div className="relative space-y-6">
-          <span className="pill">● Devis & factures artisan · Plombiers & chauffagistes · Hauts-de-France</span>
+          <span className="pill">● Devis & factures pour artisans du bâtiment · Hauts-de-France</span>
           <h1 className="mx-auto max-w-4xl text-4xl font-bold leading-[1.05] sm:text-6xl">
             Le client a choisi l&apos;autre.
             <br />
@@ -283,7 +283,7 @@ export default async function HomePage() {
             Fait pour le terrain.
           </h2>
           <p className="font-light leading-relaxed text-[#6f6a7d]">
-            Pensé pour un plombier ou un chauffagiste pressé. L&apos;IA accélère ; vous gardez le prix, le ton et
+            Pensé pour un artisan pressé, sur le chantier. L&apos;IA accélère ; vous gardez le prix, le ton et
             le dernier mot.
           </p>
         </div>

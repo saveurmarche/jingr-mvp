@@ -9,7 +9,7 @@ export type CatalogLine = { label: string; qty: number; unit: string; pu: number
 
 export type CatalogEntry = {
   slug: string;
-  metier: "plombier" | "chauffagiste";
+  metier: "plombier" | "chauffagiste" | "électricien";
   title: string;
   short: string;
   tva: number;
@@ -157,6 +157,66 @@ export const catalog: CatalogEntry[] = [
       { label: "Pose, raccordement, remise en eau et purge", qty: 1, unit: "forfait", pu: 160 },
     ],
     pitfalls: ["Oublier la purge et l'équilibrage du réseau après remise en eau."],
+  },
+  {
+    slug: "remplacement-tableau-electrique",
+    metier: "électricien",
+    title: "Remplacement de tableau électrique",
+    short: "Dépose de l'ancien tableau, nouveau tableau pré-équipé avec interrupteurs différentiels 30 mA, repérage des circuits.",
+    tva: 10,
+    tvaNote: "TVA 10 % en rénovation d'un logement de plus de 2 ans (attestation simplifiée du client).",
+    lines: [
+      { label: "Diagnostic de l'installation et repérage des circuits", qty: 1, unit: "forfait", pu: 90 },
+      { label: "Dépose de l'ancien tableau et évacuation", qty: 1, unit: "forfait", pu: 80 },
+      { label: "Fourniture tableau 3 rangées pré-équipé (2 interrupteurs différentiels 30 mA)", qty: 1, unit: "u", pu: 390 },
+      { label: "Fourniture disjoncteurs divisionnaires complémentaires", qty: 6, unit: "u", pu: 14 },
+      { label: "Pose, raccordement des circuits et étiquetage", qty: 1, unit: "forfait", pu: 360 },
+      { label: "Essais, contrôle de la terre et mise en service", qty: 1, unit: "forfait", pu: 60 },
+    ],
+    pitfalls: [
+      "Ne pas préciser si la mise à la terre existante est conforme (et ce qui se passe si elle ne l'est pas).",
+      "Oublier le repérage et l'étiquetage des circuits.",
+      "Laisser croire que l'installation entière devient conforme NF C 15-100 : seul le tableau est refait.",
+    ],
+  },
+  {
+    slug: "creation-circuit-prises-cuisine",
+    metier: "électricien",
+    title: "Création de circuits prises en cuisine",
+    short: "Circuits spécialisés plaque, four et lave-vaisselle, prises plan de travail, protection au tableau.",
+    tva: 10,
+    tvaNote: "TVA 10 % en rénovation d'un logement de plus de 2 ans.",
+    lines: [
+      { label: "Déplacement et étude des besoins", qty: 1, unit: "forfait", pu: 50 },
+      { label: "Circuit spécialisé plaque de cuisson 32 A (câble 6 mm²)", qty: 1, unit: "u", pu: 230 },
+      { label: "Circuits spécialisés four et lave-vaisselle 20 A", qty: 2, unit: "u", pu: 160 },
+      { label: "Prises 16 A plan de travail (fourniture et pose)", qty: 4, unit: "u", pu: 55 },
+      { label: "Fourniture et pose disjoncteurs au tableau", qty: 4, unit: "u", pu: 28 },
+      { label: "Saignées ou goulottes (hors reprise de peinture)", qty: 1, unit: "forfait", pu: 120 },
+    ],
+    pitfalls: [
+      "Ne pas préciser si les saignées sont rebouchées et si la peinture est comprise.",
+      "Oublier les disjoncteurs ou la place disponible au tableau.",
+    ],
+  },
+  {
+    slug: "installation-spots-led",
+    metier: "électricien",
+    title: "Installation de spots LED encastrés",
+    short: "Perçage du plafond, spots LED basse consommation, alimentation et interrupteur, mise en service.",
+    tva: 10,
+    tvaNote: "TVA 10 % en rénovation d'un logement de plus de 2 ans.",
+    lines: [
+      { label: "Déplacement et préparation du chantier", qty: 1, unit: "forfait", pu: 50 },
+      { label: "Fourniture spots LED encastrables avec transformateur", qty: 8, unit: "u", pu: 32 },
+      { label: "Perçage plafond et pose des spots", qty: 8, unit: "u", pu: 30 },
+      { label: "Tirage de câble et raccordement", qty: 1, unit: "forfait", pu: 140 },
+      { label: "Fourniture et pose interrupteur (va-et-vient si besoin)", qty: 1, unit: "u", pu: 60 },
+    ],
+    pitfalls: [
+      "Ne pas vérifier la hauteur de plénum et l'isolant au-dessus du plafond.",
+      "Oublier de préciser l'indice de protection (IP) en salle de bain.",
+    ],
   },
 ];
 
