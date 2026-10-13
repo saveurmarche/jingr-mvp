@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
+import { mergeIntoPriceList, parsePriceListText } from "@/lib/price-list";
 
 /** Mise à jour du profil artisan, authentifiée par un jeton de revue. */
 const schema = z.object({
@@ -14,21 +15,36 @@ const schema = z.object({
   tva_franchise: z.boolean().optional(),
   tutoiement: z.boolean().optional(),
   billing_software: z.string().max(60).nullable().optional(),
+  /** Tarif collé : une ligne par article « désignation ; unité ; prix HT » */
+  price_list_text: z.string().max(50_000).optional(),
 });
 
 export async function POST(req: NextRequest) {
   try {
-    const { token, ...fields } = schema.parse(await req.json());
+    const { token, price_list_text, ...fields } = schema.parse(await req.json());
     const data = await db.getByReviewToken(token);
     if (!data?.artisan) {
       return NextResponse.json({ ok: false, error: "Lien invalide" }, { status: 404 });
     }
-    const artisan = await db.findOrCreateArtisan({
+    let artisan = await db.findOrCreateArtisan({
       ...fields,
       name: fields.name ?? data.artisan.name,
       phone: data.artisan.phone,
     });
-    return NextResponse.json({ ok: true, artisan });
+    let imported = 0;
+    if (price_list_text?.trim()) {
+      const items = parsePriceListText(price_list_text);
+      imported = items.length;
+      if (imported) {
+        artisan = (await db.updateArtisan(artisan.id, {
+          price_list: mergeIntoPriceList(
+            artisan.price_list,
+            items.map((p, i) => ({ id: String(i), label: p.label, quantity: 1, unit: p.unit, unit_price_ht: p.unit_price_ht, tva_rate: artisan.default_tva ?? 10 }))
+          ),
+        })) ?? artisan;
+      }
+    }
+    return NextResponse.json({ ok: true, artisan, imported });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Erreur";
     return NextResponse.json({ ok: false, error: message }, { status: 400 });
