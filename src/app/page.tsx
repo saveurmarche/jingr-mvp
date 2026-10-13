@@ -8,7 +8,7 @@ import { catalog } from "@/lib/seo-catalog";
 // Les avis approuvés en back-office apparaissent sans redéploiement
 export const dynamic = "force-dynamic";
 
-const PRICE = process.env.NEXT_PUBLIC_PRICE_MONTHLY || "29";
+const PRICE = process.env.NEXT_PUBLIC_PRICE_MONTHLY || "49";
 const FREE = process.env.FREE_DRAFTS || "10";
 const PIONEER_SPOTS = process.env.PIONEER_SPOTS || "20";
 

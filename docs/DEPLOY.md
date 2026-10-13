@@ -78,7 +78,7 @@ réponses sont des messages de service, sans modèle (template) à faire valider
 
 ## 4. Stripe : encaisser
 
-Stripe → Payment Links → produit « jingr Artisan », 29 € HT/mois, TVA activée.
+Stripe → Payment Links → produit « jingr Artisan », 49 € HT/mois, TVA activée.
 Mettre le lien dans `NEXT_PUBLIC_STRIPE_PAYMENT_LINK`. Il est proposé automatiquement
 sur WhatsApp au 10e devis (`FREE_DRAFTS`).
 
