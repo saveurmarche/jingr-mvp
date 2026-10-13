@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
+import { appUrl } from "@/lib/intake";
 import { ReviewEditor } from "@/components/ReviewEditor";
 
 export default async function ReviewPage({
@@ -11,6 +12,7 @@ export default async function ReviewPage({
   const data = await db.getByReviewToken(token);
   if (!data) notFound();
   const invoice = await db.getInvoiceByDraft(data.draft.id);
+  const clientLink = await db.getClientLinkByDraft(data.draft.id);
 
   return (
     <div className="space-y-6">
@@ -34,6 +36,8 @@ export default async function ReviewPage({
         jobDescription={data.job.description}
         clientName={data.job.client_name}
         initialInvoice={invoice}
+        initialClientUrl={clientLink ? `${appUrl()}/d/${clientLink.token}` : null}
+        clientPhone={data.job.client_phone ?? null}
         artisan={data.artisan ?? null}
       />
     </div>
