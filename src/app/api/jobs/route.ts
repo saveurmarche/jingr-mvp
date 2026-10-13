@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { generateDraftForJob } from "@/lib/draft-pipeline";
 import { saveBase64Photo, saveFilePhoto } from "@/lib/uploads";
 import { transcribeAudio } from "@/lib/ai";
+import { checkOpsPassword } from "@/lib/ops-auth";
 
 const schema = z.object({
   artisan_name: z.string().min(1),
@@ -212,7 +213,11 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET() {
+/** Liste complète (back-office uniquement) : contient données clients et jetons de revue. */
+export async function GET(req: NextRequest) {
+  if (!checkOpsPassword(req.headers.get("x-ops-password"))) {
+    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+  }
   const jobs = await db.listJobs();
   return NextResponse.json({ ok: true, jobs, db_mode: db.mode() });
 }

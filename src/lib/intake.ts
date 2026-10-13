@@ -28,6 +28,8 @@ export function appUrl(): string {
 
 const FREE_DRAFTS = Number(process.env.FREE_DRAFTS || 10);
 const REFERRAL_AT = 3;
+const TESTIMONIAL_AT = 5;
+const TESTIMONIAL_RE = /^\s*avis\s*[:：-]?\s*/i;
 
 function eur(n: number) {
   return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(n);
@@ -41,6 +43,46 @@ export async function handleIncoming(msg: IncomingMessage): Promise<IntakeResult
   }
   const captions = (msg.images || []).map((i) => i.caption).filter(Boolean);
   text = [text, ...captions].filter(Boolean).join("\n").trim();
+
+  if (/^\s*supprimer\s+mon\s+compte/i.test(text)) {
+    await db.inboxInsert({
+      channel: msg.channel,
+      from_phone: msg.from,
+      body: text,
+      raw: { kind: "deletion_request", external_id: msg.external_id ?? null },
+    });
+    return {
+      ok: false,
+      error: "suppression_demandee",
+      reply:
+        "Demande de suppression bien reçue. Votre compte et vos chantiers seront supprimés sous 30 jours maximum. Pensez à télécharger vos factures avant : la loi vous impose de les conserver 10 ans.",
+    };
+  }
+
+  if (/^\s*retirer\s+avis/i.test(text)) {
+    const known = (await db.listJobsByPhone(msg.from))[0]?.artisan;
+    if (known) await db.withdrawTestimonials(known.id);
+    return { ok: false, error: "avis_retire", reply: "C'est fait : votre avis est supprimé de jingr.ai." };
+  }
+
+  // « AVIS : … » = témoignage, pas un chantier
+  if (TESTIMONIAL_RE.test(text)) {
+    const body = text.replace(TESTIMONIAL_RE, "").trim();
+    const known = (await db.listJobsByPhone(msg.from))[0]?.artisan;
+    if (!known || body.length < 10) {
+      return {
+        ok: false,
+        error: "avis_invalide",
+        reply: "Merci ! Pour laisser un avis, écrivez « AVIS : » suivi de votre phrase, après avoir fait au moins un devis.",
+      };
+    }
+    await db.addTestimonial({ artisan: known, text: body.slice(0, 400) });
+    return {
+      ok: false,
+      error: "avis_enregistre",
+      reply: "Merci beaucoup 🙏 Votre avis sera relu puis publié sur jingr.ai (prénom, initiale du nom et métier uniquement). Répondez « RETIRER AVIS » à tout moment pour le supprimer.",
+    };
+  }
 
   if (text.length < 5) {
     return {
@@ -101,6 +143,12 @@ export async function handleIncoming(msg: IncomingMessage): Promise<IntakeResult
     lines.push(
       "",
       `🎁 Un collègue artisan perd ses soirées sur ses devis ? Transférez-lui ce numéro : vous gagnez chacun 1 mois offert.`
+    );
+  }
+  if (count === TESTIMONIAL_AT) {
+    lines.push(
+      "",
+      "Déjà 5 devis 💪 Une phrase sur jingr pour aider d'autres artisans ? Répondez « AVIS : » suivi de votre avis (publié avec votre prénom et votre métier)."
     );
   }
   const payLink = process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK;

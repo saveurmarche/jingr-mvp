@@ -44,17 +44,23 @@ export default function MesDevisPage() {
   const [jobs, setJobs] = useState<JobRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [sentMsg, setSentMsg] = useState<string | null>(null);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
     setJobs(null);
+    setSentMsg(null);
     try {
       const res = await fetch(`/api/mes-devis?phone=${encodeURIComponent(phone)}`);
       const json = await res.json();
       if (!json.ok) {
         setError(json.error || "Erreur");
+        return;
+      }
+      if (json.sent) {
+        setSentMsg(json.message);
         return;
       }
       setJobs(json.jobs);
@@ -70,7 +76,7 @@ export default function MesDevisPage() {
       <div>
         <h1 className="text-2xl font-bold text-stone-900">Mes devis</h1>
         <p className="mt-1 text-stone-600">
-          Entrez votre téléphone artisan pour retrouver vos brouillons.
+          Entrez votre numéro : vous recevez la liste de vos devis sur WhatsApp.
         </p>
       </div>
 
@@ -93,6 +99,10 @@ export default function MesDevisPage() {
 
       {error ? (
         <div className="card border-red-200 text-red-700">{error}</div>
+      ) : null}
+
+      {sentMsg ? (
+        <div className="card border-[#c4b5fd] text-stone-700">📲 {sentMsg}</div>
       ) : null}
 
       {jobs ? (

@@ -35,8 +35,13 @@ export default function RootLayout({
           </div>
         </header>
         <main className="mx-auto max-w-3xl px-4 py-8">{children}</main>
-        <footer className="mx-auto max-w-3xl px-4 pb-10 pt-4 text-center text-xs text-stone-400">
-          jingr — devis et factures pour artisans. Rien n&apos;est envoyé à vos clients sans votre validation.
+        <footer className="mx-auto max-w-3xl space-y-2 px-4 pb-10 pt-4 text-center text-xs text-stone-400">
+          <p>jingr — devis et factures pour artisans. Rien n&apos;est envoyé à vos clients sans votre validation.</p>
+          <p className="space-x-3">
+            <Link href="/confidentialite" className="hover:text-stone-600">Confidentialité</Link>
+            <Link href="/mentions-legales" className="hover:text-stone-600">Mentions légales</Link>
+            <Link href="/facture-electronique-artisan" className="hover:text-stone-600">Facture électronique</Link>
+          </p>
         </footer>
       </body>
     </html>

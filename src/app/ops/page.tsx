@@ -2,6 +2,16 @@
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
 
+type TestimonialRow = {
+  id: string;
+  text: string;
+  display_name: string;
+  trade: string;
+  city?: string | null;
+  status: "pending" | "approved" | "rejected";
+  created_at: string;
+};
+
 type JobRow = {
   id: string;
   client_name: string;
@@ -18,16 +28,38 @@ export default function OpsPage() {
   const [error, setError] = useState<string | null>(null);
   const [jobs, setJobs] = useState<JobRow[]>([]);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [testimonials, setTestimonials] = useState<TestimonialRow[]>([]);
+  const [deletions, setDeletions] = useState<{ phone: string; at: string }[]>([]);
 
   const load = useCallback(async () => {
-    const res = await fetch("/api/jobs");
-    const json = await res.json();
+    const headers = { "x-ops-password": password };
+    const [jobsRes, tRes] = await Promise.all([
+      fetch("/api/jobs", { headers }),
+      fetch("/api/ops/testimonials", { headers }),
+    ]);
+    const json = await jobsRes.json();
     if (json.ok) setJobs(json.jobs);
-  }, []);
+    const tJson = await tRes.json();
+    if (tJson.ok) {
+      setTestimonials(tJson.testimonials);
+      setDeletions(tJson.deletion_requests ?? []);
+    }
+  }, [password]);
+
+  async function moderate(id: string, status: TestimonialRow["status"]) {
+    await fetch("/api/ops/testimonials", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-ops-password": password },
+      body: JSON.stringify({ id, status }),
+    });
+    await load();
+  }
 
   useEffect(() => {
     if (authed) void load();
-  }, [authed, load]);
+    // load dépend du mot de passe saisi : on ne recharge qu'à l'authentification
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authed]);
 
   function onLogin(e: FormEvent) {
     e.preventDefault();
@@ -89,6 +121,49 @@ export default function OpsPage() {
 
   return (
     <div className="space-y-6">
+      {deletions.length ? (
+        <section className="card space-y-2 border-red-200">
+          <h1 className="text-lg font-bold text-red-700">
+            Demandes de suppression de compte (à traiter sous 30 jours)
+          </h1>
+          {deletions.map((d) => (
+            <p key={d.phone + d.at} className="text-sm">
+              {d.phone} — {new Date(d.at).toLocaleDateString("fr-FR")}
+            </p>
+          ))}
+        </section>
+      ) : null}
+
+      <section className="space-y-3">
+        <h1 className="text-2xl font-bold">Avis artisans</h1>
+        {testimonials.length === 0 ? (
+          <p className="text-stone-500">
+            Aucun avis. Ils arrivent par WhatsApp (« AVIS : … »), proposés automatiquement au 5e devis.
+          </p>
+        ) : (
+          testimonials.map((t) => (
+            <div key={t.id} className="card space-y-2">
+              <p className="text-stone-800">« {t.text} »</p>
+              <p className="text-xs text-stone-500">
+                {t.display_name} · {t.trade}
+                {t.city ? ` · ${t.city}` : ""} · {t.status} ·{" "}
+                {new Date(t.created_at).toLocaleDateString("fr-FR")}
+              </p>
+              <div className="flex gap-2">
+                <button className="btn-primary text-sm py-2" disabled={t.status === "approved"}
+                  onClick={() => void moderate(t.id, "approved")}>
+                  Publier
+                </button>
+                <button className="btn-secondary text-sm py-2" disabled={t.status === "rejected"}
+                  onClick={() => void moderate(t.id, "rejected")}>
+                  Refuser
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </section>
+
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Jobs</h1>
         <button className="btn-secondary text-sm py-2" onClick={() => void load()}>

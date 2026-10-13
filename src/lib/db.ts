@@ -6,6 +6,7 @@ import type {
   DbShape,
   Invoice,
   Job,
+  Testimonial,
   JobAsset,
   MessageInbox,
   QuoteDraft,
@@ -25,6 +26,7 @@ const emptyDb = (): DbShape => ({
   review_tokens: [],
   message_inbox: [],
   invoices: [],
+  testimonials: [],
 });
 
 function hasSupabaseConfig(): boolean {
@@ -53,8 +55,13 @@ function nowIso() {
   return new Date().toISOString();
 }
 
-function normalizePhone(phone: string) {
-  return phone.replace(/\s+/g, "");
+/** Format E.164 pour la France : « 06 12 34 56 78 » et « +33612345678 » désignent le même artisan. */
+export function normalizePhone(phone: string) {
+  let p = phone.replace(/[\s.\-()]/g, "");
+  if (p.startsWith("00")) p = `+${p.slice(2)}`;
+  if (/^0\d{9}$/.test(p)) p = `+33${p.slice(1)}`;
+  if (/^33\d{9}$/.test(p)) p = `+${p}`;
+  return p;
 }
 
 export const db = {
@@ -381,6 +388,13 @@ export const db = {
     return msg;
   },
 
+  async listInboxByKind(kind: string): Promise<MessageInbox[]> {
+    const store = await readStore();
+    return store.message_inbox
+      .filter((m) => m.raw?.kind === kind)
+      .sort((a, b) => b.created_at.localeCompare(a.created_at));
+  },
+
   /** Meta renvoie un webhook tant qu'il n'a pas reçu 200 : on déduplique par id de message. */
   async inboxHasExternalId(externalId: string): Promise<boolean> {
     const store = await readStore();
@@ -455,6 +469,57 @@ export const db = {
     inv.paid_at = nowIso();
     await writeStore(store);
     return inv;
+  },
+
+  async addTestimonial(input: {
+    artisan: Artisan;
+    text: string;
+  }): Promise<Testimonial> {
+    const store = await readStore();
+    const first = input.artisan.name.split(" ")[0] || "Artisan";
+    const lastInitial = input.artisan.name.split(" ")[1]?.[0];
+    const t: Testimonial = {
+      id: randomUUID(),
+      artisan_id: input.artisan.id,
+      text: input.text,
+      display_name: lastInitial ? `${first} ${lastInitial}.` : first,
+      trade: input.artisan.trade === "chauffage" ? "Chauffagiste" : "Plombier",
+      city: input.artisan.city ?? null,
+      status: "pending",
+      consent: true,
+      created_at: nowIso(),
+    };
+    store.testimonials.push(t);
+    await writeStore(store);
+    return t;
+  },
+
+  async listTestimonials(status?: Testimonial["status"]): Promise<Testimonial[]> {
+    const store = await readStore();
+    return store.testimonials
+      .filter((t) => !status || t.status === status)
+      .sort((a, b) => b.created_at.localeCompare(a.created_at));
+  },
+
+  /** Retrait à la demande de l'artisan (RGPD) : plus jamais affiché. */
+  async withdrawTestimonials(artisanId: string): Promise<number> {
+    const store = await readStore();
+    const mine = store.testimonials.filter((t) => t.artisan_id === artisanId);
+    store.testimonials = store.testimonials.filter((t) => t.artisan_id !== artisanId);
+    await writeStore(store);
+    return mine.length;
+  },
+
+  async setTestimonialStatus(
+    id: string,
+    status: Testimonial["status"]
+  ): Promise<Testimonial | null> {
+    const store = await readStore();
+    const t = store.testimonials.find((x) => x.id === id);
+    if (!t) return null;
+    t.status = status;
+    await writeStore(store);
+    return t;
   },
 
   async reset(): Promise<void> {

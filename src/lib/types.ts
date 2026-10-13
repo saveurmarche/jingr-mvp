@@ -126,6 +126,21 @@ export type Invoice = {
   created_at: string;
 };
 
+export type Testimonial = {
+  id: string;
+  artisan_id: string;
+  text: string;
+  /** Affichage public : prénom + initiale, métier, ville */
+  display_name: string;
+  trade: string;
+  city?: string | null;
+  /** pending tant que l'équipe n'a pas relu ; seul approved est publié */
+  status: "pending" | "approved" | "rejected";
+  /** L'artisan a accepté la publication en répondant AVIS */
+  consent: boolean;
+  created_at: string;
+};
+
 export type DbShape = {
   artisans: Artisan[];
   jobs: Job[];
@@ -135,6 +150,7 @@ export type DbShape = {
   review_tokens: ReviewToken[];
   message_inbox: MessageInbox[];
   invoices: Invoice[];
+  testimonials: Testimonial[];
 };
 
 /** Defaults for artisans loaded from older store.json without new fields */

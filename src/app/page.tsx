@@ -1,9 +1,29 @@
 import Link from "next/link";
 import { StartCta } from "@/components/Cta";
+import { db } from "@/lib/db";
 import { catalog } from "@/lib/seo-catalog";
+
+// Les avis approuvés en back-office apparaissent sans redéploiement
+export const dynamic = "force-dynamic";
 
 const PRICE = process.env.NEXT_PUBLIC_PRICE_MONTHLY || "29";
 const FREE = process.env.FREE_DRAFTS || "10";
+const PIONEER_SPOTS = process.env.PIONEER_SPOTS || "20";
+
+const benefits: [string, string, string][] = [
+  ["🌙", "Vos soirées vous reviennent", "Le devis se fait sur le chantier, en dictant. Plus de paperasse à 22h après la journée."],
+  ["⚡", "Vous passez avant les autres", "Devis envoyé le jour même de la visite, pendant que le client a encore le chantier en tête."],
+  ["✅", "Des factures en règle", "Numérotation continue, mentions obligatoires, TVA juste. Prêt pour la facture électronique 2027."],
+  ["📱", "Rien à apprendre", "Ça se passe sur WhatsApp, que vous utilisez déjà. Pas de logiciel, pas de catalogue à configurer."],
+];
+
+const comparison: [string, string, string, string][] = [
+  ["Saisie du devis", "À la main", "Articles à choisir dans un catalogue", "Un vocal de 30 secondes"],
+  ["Où", "Au bureau, le soir", "Sur l'ordinateur ou une appli", "Sur WhatsApp, depuis le chantier"],
+  ["Mise en route", "—", "Paramétrage, formation", "Un premier message"],
+  ["Facture", "Copier-coller du devis", "Oui", "Un clic depuis le devis"],
+  ["Prix", "« Gratuit »… et vos soirées", "Abonnement + temps de paramétrage", `${process.env.NEXT_PUBLIC_PRICE_MONTHLY || "29"} € HT/mois`],
+];
 
 const faq: [string, string][] = [
   [
@@ -28,7 +48,8 @@ const faq: [string, string][] = [
   ],
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const testimonials = (await db.listTestimonials("approved")).slice(0, 6);
   return (
     <div className="space-y-10">
       <section className="card space-y-5">
@@ -85,6 +106,84 @@ export default function HomePage() {
           </div>
         ))}
       </section>
+
+      <section className="space-y-3">
+        <h2 className="text-xl font-bold text-stone-900">
+          jingr transforme un vocal de chantier en devis chiffré, puis en facture conforme
+        </h2>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {benefits.map(([icon, t, d]) => (
+            <div key={t} className="card flex gap-3">
+              <span className="text-2xl" aria-hidden>{icon}</span>
+              <div>
+                <h3 className="font-semibold text-stone-900">{t}</h3>
+                <p className="mt-1 text-sm text-stone-600">{d}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-xl font-bold text-stone-900">Pourquoi pas Word ou un logiciel de devis ?</h2>
+        <div className="card overflow-x-auto p-0">
+          <table className="w-full min-w-[560px] text-sm">
+            <thead>
+              <tr className="text-left">
+                <th className="p-3"></th>
+                <th className="p-3 text-[#6B4EFF]">jingr</th>
+                <th className="p-3 text-stone-500">Word / Excel</th>
+                <th className="p-3 text-stone-500">Logiciel de devis</th>
+              </tr>
+            </thead>
+            <tbody>
+              {comparison.map(([label, a, b, c]) => (
+                <tr key={label} className="border-t border-[#ebe4da]">
+                  <td className="p-3 font-semibold text-stone-700">{label}</td>
+                  <td className="p-3 font-semibold text-stone-900 bg-[#faf8ff]">{c}</td>
+                  <td className="p-3 text-stone-600">{a}</td>
+                  <td className="p-3 text-stone-600">{b}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {testimonials.length > 0 ? (
+        <section className="space-y-3">
+          <h2 className="text-xl font-bold text-stone-900">Ils l&apos;utilisent sur leurs chantiers</h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {testimonials.map((t) => (
+              <figure key={t.id} className="card space-y-2">
+                <blockquote className="text-stone-800">« {t.text} »</blockquote>
+                <figcaption className="text-sm text-stone-500">
+                  {t.display_name} — {t.trade}
+                  {t.city ? `, ${t.city}` : ""}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+          <p className="text-xs text-stone-400">
+            Avis envoyés par des artisans utilisateurs de jingr, publiés avec leur accord.
+          </p>
+        </section>
+      ) : (
+        <section className="card space-y-3 border-[#c4b5fd] bg-[#faf8ff]">
+          <p className="text-sm font-semibold uppercase tracking-wide text-[#6B4EFF]">
+            Programme artisans pionniers
+          </p>
+          <h2 className="text-xl font-bold text-stone-900">
+            jingr démarre. Construisez-le avec nous.
+          </h2>
+          <p className="text-stone-700">
+            Les {PIONEER_SPOTS} premiers artisans ont <strong>3 mois offerts</strong> en échange de
+            leurs retours : ce qui manque, ce qui gêne, les lignes de devis à corriger. Vous avez
+            un accès direct aux fondateurs, sur WhatsApp.
+          </p>
+          <StartCta label="Devenir artisan pionnier" />
+        </section>
+      )}
 
       <section id="tarifs" className="space-y-3">
         <h2 className="text-xl font-bold text-stone-900">Tarif</h2>

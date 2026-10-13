@@ -14,11 +14,16 @@ npm run dev
 - `/` landing · `/go` envoi web (texte, vocal, photos) · `/review/[token]` relecture, réglages entreprise, facture
 - `/mes-devis` historique par téléphone · `/ops` back-office
 - `/modele-devis/[slug]`, `/facture-electronique-artisan` pages SEO · `sitemap.xml`, `robots.txt`
+- `/confidentialite`, `/mentions-legales`
+
+## Commandes WhatsApp (artisan)
+- vocal / texte / photo → devis · `AVIS : …` témoignage · `RETIRER AVIS` · `SUPPRIMER MON COMPTE`
 
 ## APIs
 - `POST /api/whatsapp/webhook` (Meta Cloud API signé, ou JSON en mode test) · `GET` vérification Meta
 - `POST /api/jobs` · `POST /api/drafts/[id]` · `GET /api/pdf/[token]`
 - `POST /api/invoices` (create / paid) · `GET /api/facture/[token]` · `POST /api/artisan`
+- Back-office (en-tête `x-ops-password`) : `GET /api/jobs`, `GET|POST /api/ops/testimonials`
 
 ## Scripts
 - `npm run prospects -- --dep 69,01 --mois 18` liste de prospects (API publique data.gouv)
@@ -26,5 +31,6 @@ npm run dev
 ## Docs
 - `docs/GROWTH.md` machine d'acquisition, séquences, routine hebdo
 - `docs/DEPLOY.md` Azure + DNS OVH + WhatsApp Meta + Stripe
+- `docs/ROADMAP.md` roadmap produit par phases
 
 Local JSON store si pas de Supabase. Schéma dans supabase/migrations.
