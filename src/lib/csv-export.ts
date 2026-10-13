@@ -5,7 +5,9 @@ function frNum(n: number): string {
   return String(Math.round(n * 100) / 100).replace(".", ",");
 }
 
-function cell(v: string): string {
+function cell(raw: string): string {
+  // Un texte commençant par = + - @ serait interprété comme une formule par Excel : on le neutralise.
+  const v = /^[=+\-@\t\r]/.test(raw) ? `'${raw}` : raw;
   return /[;"\n\r]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
 }
 
