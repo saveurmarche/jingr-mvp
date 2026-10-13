@@ -73,7 +73,8 @@ ZIP="$BUILD/jingr.zip"
 (cd "$PKG" && zip -qr "$ZIP" .)
 
 echo "→ Déploiement (paquet prêt à démarrer, 1 à 3 minutes)"
-az webapp deploy -n "$APP" -g "$RG" --src-path "$ZIP" --type zip --async false -o none
+az webapp deploy -n "$APP" -g "$RG" --src-path "$ZIP" --type zip --async false \
+  --track-status false -o none  # le suivi de démarrage d'az reste bloqué : on vérifie nous-mêmes en HTTP ci-dessous
 
 echo "→ Vérification"
 for i in $(seq 1 30); do
@@ -82,6 +83,10 @@ for i in $(seq 1 30); do
   sleep 10
 done
 echo "   https://$HOST/ → HTTP $code"
+if [[ "$code" != "200" ]]; then
+  echo "❌ Le site ne répond pas. Logs : az webapp log tail -n $APP -g $RG" >&2
+  exit 1
+fi
 echo "   https://$HOST/sitemap.xml → HTTP $(curl -s -o /dev/null -w '%{http_code}' "https://$HOST/sitemap.xml")"
 echo
 echo "✅ jingr déployé : https://$HOST"
