@@ -21,7 +21,19 @@ export type Artisan = {
   payment_days?: number;
   /** Logiciel de facturation déjà utilisé (null / "jingr" = facture dans jingr) */
   billing_software?: string | null;
+  /** Catalogue de prix appris des devis validés (prix de vente HT de l'artisan) */
+  price_list?: PriceItem[];
+  /** STOP : l'agent ne traite plus ses messages jusqu'à REPRENDRE */
+  paused?: boolean;
   created_at: string;
+};
+
+export type PriceItem = {
+  label: string;
+  unit: string;
+  unit_price_ht: number;
+  tva_rate?: number;
+  updated_at: string;
 };
 
 export type JobStatus =
@@ -61,6 +73,8 @@ export type QuoteLineItem = {
   unit: string;
   unit_price_ht: number;
   tva_rate: number;
+  /** catalogue = prix de l'artisan ; estimate = proposé par l'IA, à confirmer ; manual = saisi ou confirmé */
+  price_source?: "catalogue" | "estimate" | "manual";
 };
 
 export type QuoteDraft = {

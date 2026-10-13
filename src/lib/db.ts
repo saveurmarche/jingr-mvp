@@ -210,6 +210,24 @@ export const db = {
     return artisan;
   },
 
+  async findArtisanByPhone(phone: string): Promise<Artisan | null> {
+    const store = await readStore();
+    const p = normalizePhone(phone);
+    return store.artisans.find((a) => normalizePhone(a.phone) === p) ?? null;
+  },
+
+  async updateArtisan(
+    id: string,
+    patch: Partial<Pick<Artisan, "paused" | "price_list">>
+  ): Promise<Artisan | null> {
+    const store = await readStore();
+    const artisan = store.artisans.find((a) => a.id === id);
+    if (!artisan) return null;
+    Object.assign(artisan, patch);
+    await writeStore(store);
+    return artisan;
+  },
+
   async createJob(input: {
     artisan_id: string;
     client_name: string;

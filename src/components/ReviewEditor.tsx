@@ -66,6 +66,7 @@ export function ReviewEditor({
   const [billing, setBilling] = useState<string | null>(artisan?.billing_software ?? null);
 
   const sums = useMemo(() => recalc(items), [items]);
+  const estimates = items.filter((i) => i.price_source === "estimate").length;
   const waUrl = useMemo(
     () => whatsappShareUrl(token, clientName),
     [token, clientName]
@@ -85,6 +86,7 @@ export function ReviewEditor({
         unit: "forfait",
         unit_price_ht: 0,
         tva_rate: 10,
+        price_source: "manual",
       },
     ]);
   }
@@ -165,8 +167,19 @@ export function ReviewEditor({
               + Ligne
             </button>
           </div>
+          {estimates > 0 ? (
+            <p className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+              {estimates} prix proposé{estimates > 1 ? "s" : ""} par jingr (en orange) : corrigez-les ou confirmez-les
+              avant de valider. Une fois validés, ils sont retenus pour vos prochains devis.
+            </p>
+          ) : null}
           {items.map((li) => (
-            <div key={li.id} className="grid gap-2 rounded-xl border border-[#ebe4da] p-3 sm:grid-cols-12">
+            <div
+              key={li.id}
+              className={`grid gap-2 rounded-xl border p-3 sm:grid-cols-12 ${
+                li.price_source === "estimate" ? "border-amber-300 bg-amber-50" : "border-[#ebe4da]"
+              }`}
+            >
               <input
                 className="input sm:col-span-5"
                 value={li.label}
@@ -189,8 +202,9 @@ export function ReviewEditor({
                 type="number"
                 step="0.01"
                 value={li.unit_price_ht}
+                title={li.price_source === "estimate" ? "Prix estimé par jingr : à confirmer" : undefined}
                 onChange={(e) =>
-                  updateItem(li.id, { unit_price_ht: Number(e.target.value) })
+                  updateItem(li.id, { unit_price_ht: Number(e.target.value), price_source: "manual" })
                 }
               />
               <button
@@ -200,6 +214,18 @@ export function ReviewEditor({
               >
                 ✕
               </button>
+              {li.price_source === "estimate" ? (
+                <div className="flex items-center gap-3 text-xs text-amber-900 sm:col-span-12">
+                  Prix estimé, pas encore votre tarif.
+                  <button
+                    type="button"
+                    className="rounded-full border border-amber-400 px-3 py-1 font-semibold"
+                    onClick={() => updateItem(li.id, { price_source: "manual" })}
+                  >
+                    Prix OK
+                  </button>
+                </div>
+              ) : null}
             </div>
           ))}
         </div>
@@ -219,7 +245,12 @@ export function ReviewEditor({
           <button className="btn-secondary" disabled={busy} onClick={() => save("save")}>
             Enregistrer
           </button>
-          <button className="btn-primary" disabled={busy || status === "validated"} onClick={() => save("validate")}>
+          <button
+            className="btn-primary"
+            disabled={busy || status === "validated" || estimates > 0}
+            title={estimates > 0 ? "Confirmez d'abord les prix en orange" : undefined}
+            onClick={() => save("validate")}
+          >
             {status === "validated" ? "Déjà validé" : "Valider le devis"}
           </button>
           <a className="btn-secondary" href={`/api/pdf/${token}`}>

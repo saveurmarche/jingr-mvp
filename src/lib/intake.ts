@@ -59,6 +59,40 @@ export async function handleIncoming(msg: IncomingMessage): Promise<IntakeResult
     };
   }
 
+  // STOP / REPRENDRE : l'artisan met l'agent en pause pour lui seul.
+  if (/^\s*(stop|pause)\s*$/i.test(text) || /^\s*reprendre\s*$/i.test(text)) {
+    const resume = /reprendre/i.test(text);
+    const known = await db.findArtisanByPhone(msg.from);
+    if (known) await db.updateArtisan(known.id, { paused: !resume });
+    return {
+      ok: false,
+      error: resume ? "agent_repris" : "agent_en_pause",
+      reply: resume
+        ? "C'est reparti 👍 Envoyez-moi un vocal pour votre prochain devis."
+        : "jingr est en pause pour vous : je ne traiterai plus vos messages. Écrivez « REPRENDRE » quand vous voulez.",
+    };
+  }
+
+  // Interrupteur global : AGENT_ENABLED=false coupe l'IA pour tout le monde, le message est gardé.
+  const paused = (await db.findArtisanByPhone(msg.from))?.paused;
+  if (process.env.AGENT_ENABLED === "false" || paused) {
+    if (text) {
+      await db.inboxInsert({
+        channel: msg.channel,
+        from_phone: msg.from,
+        body: text,
+        raw: { kind: paused ? "artisan_paused" : "agent_disabled", external_id: msg.external_id ?? null },
+      });
+    }
+    return {
+      ok: false,
+      error: paused ? "agent_en_pause" : "agent_desactive",
+      reply: paused
+        ? "jingr est en pause pour vous. Écrivez « REPRENDRE » pour le réactiver."
+        : `L'assistant jingr est momentanément en pause. Votre message est bien reçu ; vous pouvez aussi faire votre devis sur ${appUrl()}/go.`,
+    };
+  }
+
   if (/^\s*retirer\s+avis/i.test(text)) {
     const known = (await db.listJobsByPhone(msg.from))[0]?.artisan;
     if (known) await db.withdrawTestimonials(known.id);
@@ -131,6 +165,10 @@ export async function handleIncoming(msg: IncomingMessage): Promise<IntakeResult
     `${draft.line_items.length} lignes · ${eur(draft.total_ttc)} TTC`,
     "",
     `Relisez, corrigez et validez ici : ${reviewUrl}`,
+    ...(() => {
+      const n = draft.line_items.filter((i) => i.price_source === "estimate").length;
+      return n ? [`⚠️ ${n} prix proposé${n > 1 ? "s" : ""} par jingr, à confirmer (en orange).`] : [];
+    })(),
     "Rien n'est envoyé à votre client sans votre validation.",
   ];
   if (isNew) {

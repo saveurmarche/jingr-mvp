@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { recalcTotals } from "@/lib/draft-pipeline";
+import { hasUnconfirmedEstimates, mergeIntoPriceList } from "@/lib/price-list";
 import type { QuoteLineItem } from "@/lib/types";
 
 const lineSchema = z.object({
@@ -11,6 +12,7 @@ const lineSchema = z.object({
   unit: z.string().min(1),
   unit_price_ht: z.number().nonnegative(),
   tva_rate: z.number().nonnegative(),
+  price_source: z.enum(["catalogue", "estimate", "manual"]).optional(),
 });
 
 const patchSchema = z.object({
@@ -48,6 +50,14 @@ export async function POST(
     const line_items = (body.line_items ?? draft.line_items) as QuoteLineItem[];
     const sums = recalcTotals(line_items);
 
+    // Garde-fou : un prix proposé par l'IA ne part jamais sans confirmation de l'artisan.
+    if (body.action === "validate" && hasUnconfirmedEstimates(line_items)) {
+      return NextResponse.json(
+        { ok: false, error: "Confirmez ou corrigez les prix estimés (en orange) avant de valider." },
+        { status: 400 }
+      );
+    }
+
     const updated = await db.saveDraft({
       ...draft,
       title: body.title ?? draft.title,
@@ -66,6 +76,11 @@ export async function POST(
 
     if (body.action === "validate") {
       await db.updateJobStatus(draft.job_id, "validated");
+      // Apprentissage : les prix validés alimentent le catalogue de l'artisan pour les prochains devis.
+      const artisan = (await db.getJob(draft.job_id))?.artisan;
+      if (artisan) {
+        await db.updateArtisan(artisan.id, { price_list: mergeIntoPriceList(artisan.price_list, line_items) });
+      }
       await db.addEvent({
         quote_draft_id: draft.id,
         event_type: "validated",
