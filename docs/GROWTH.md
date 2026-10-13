@@ -12,6 +12,24 @@ remonté dans le camion**. Et on demande une seule action : envoyer un vocal.
 
 ---
 
+## Objectifs (octobre 2026)
+
+| Échéance | Objectif |
+|---|---|
+| 31 octobre | 40 artisans contactés, 3 appels de démo, 2 pilotes actifs |
+| 30 novembre | 80 contactés, 10 pilotes actifs (les 3 mois de pilote démarrent) |
+| Fin du pilote (≈ fin février) | 3 artisans payants à 49 € HT / mois, et les critères de docs/PILOT.md tenus |
+
+## Canaux, par semaine
+
+1. **Emails** : 3 lots de 10, personnalisés, envoyés depuis contact@jingr.ai (relances J+4, J+9).
+2. **Comptoirs des grossistes** (Cedeo, Point P, Rexel, Sonepar, Brossette…) : un matin par semaine,
+   7 h - 8 h 30, flyer A5 + 2 minutes avec le vendeur. Les artisans y passent tous les matins.
+3. **LinkedIn** : 2 posts par semaine, « on construit jingr à Lille » (chiffres réels, coulisses, retours d'artisans).
+4. **Groupes Facebook d'artisans du Nord** : 1 post utile par semaine (un modèle de devis gratuit), jamais de pub directe.
+5. **Réseaux** : CMA Hauts-de-France, CAPEB Nord, experts-comptables d'artisans, French Tech Lille / EuraTechnologies.
+6. **SEO** : pages « modèle de devis » par métier, page locale /logiciel-devis-artisan-lille, sitemap soumis à Search Console.
+
 ## Le tunnel
 
 ```
