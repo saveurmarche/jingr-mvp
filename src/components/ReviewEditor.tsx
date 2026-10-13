@@ -369,6 +369,8 @@ function CompanySettings({
     tva_franchise: artisan.tva_franchise ?? false,
     billing_software: artisan.billing_software ?? "jingr",
   });
+  const [priceText, setPriceText] = useState("");
+  const [catalogueSize, setCatalogueSize] = useState(artisan.price_list?.length ?? 0);
   const [saved, setSaved] = useState<string | null>(null);
 
   async function submit() {
@@ -376,11 +378,21 @@ function CompanySettings({
     const res = await fetch("/api/artisan", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token, ...form }),
+      body: JSON.stringify({ token, ...form, price_list_text: priceText || undefined }),
     });
     const json = await res.json();
-    if (json.ok) onBillingChange(form.billing_software === "jingr" ? null : form.billing_software);
-    setSaved(json.ok ? "Enregistré — appliqué à vos prochains devis et factures." : json.error || "Erreur");
+    if (json.ok) {
+      onBillingChange(form.billing_software === "jingr" ? null : form.billing_software);
+      setCatalogueSize(json.artisan?.price_list?.length ?? catalogueSize);
+      if (json.imported) setPriceText("");
+    }
+    setSaved(
+      json.ok
+        ? json.imported
+          ? `Enregistré · ${json.imported} article${json.imported > 1 ? "s" : ""} ajouté${json.imported > 1 ? "s" : ""} à votre tarif.`
+          : "Enregistré — appliqué à vos prochains devis et factures."
+        : json.error || "Erreur"
+    );
   }
 
   return (
@@ -431,6 +443,19 @@ function CompanySettings({
                 <option key={o} value={o}>{o}</option>
               ))}
             </select>
+          </label>
+          <label className="text-sm text-stone-600 sm:col-span-2">
+            Mon tarif {catalogueSize ? `(${catalogueSize} articles connus)` : "(vide pour l'instant)"}
+            <textarea
+              className="input mt-1 min-h-24 font-mono text-xs"
+              placeholder={"Collez votre tarif, une ligne par article :\nRemplacement mitigeur ; u ; 180\nMain d'œuvre ; h ; 55"}
+              value={priceText}
+              onChange={(e) => setPriceText(e.target.value)}
+            />
+            <span className="text-xs text-stone-500">
+              Copié depuis Excel ou votre logiciel : désignation, unité, prix HT. jingr reprend ces prix à l&apos;identique ;
+              les autres restent « à confirmer ». Chaque devis validé complète aussi votre tarif.
+            </span>
           </label>
           <div className="sm:col-span-2 flex items-center gap-3">
             <button type="button" className="btn-primary" onClick={submit}>Enregistrer</button>

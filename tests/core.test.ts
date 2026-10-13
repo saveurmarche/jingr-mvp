@@ -80,3 +80,15 @@ test("phone: French numbers normalised to E.164", () => {
   assert.equal(normalizePhone("0033612345678"), "+33612345678");
   assert.equal(normalizePhone("+33 6 12 34 56 78"), "+33612345678");
 });
+
+test("price list import: Excel paste with headers, tabs and comma decimals", async () => {
+  const { parsePriceListText } = await import("../src/lib/price-list");
+  const items = parsePriceListText(
+    "Désignation;Unité;Prix HT\nRemplacement mitigeur ; u ; 180\nMain d'œuvre\th\t55,50 €\nTitre sans prix",
+    "2026-10-14"
+  );
+  assert.deepEqual(
+    items.map((i) => [i.label, i.unit, i.unit_price_ht]),
+    [["Remplacement mitigeur", "u", 180], ["Main d'œuvre", "h", 55.5]]
+  );
+});

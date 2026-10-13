@@ -57,3 +57,24 @@ export function catalogueForPrompt(list: PriceItem[] | undefined, max = 80): str
 export function hasUnconfirmedEstimates(items: QuoteLineItem[]): boolean {
   return items.some((i) => i.price_source === "estimate");
 }
+
+/**
+ * Tarif collé par l'artisan (copie d'Excel ou de son logiciel) : une ligne par article,
+ * « désignation ; unité ; prix HT », séparateur ; ou tabulation, virgule décimale acceptée.
+ * Les lignes sans prix lisible (en-têtes, titres) sont ignorées.
+ */
+export function parsePriceListText(text: string, now = new Date().toISOString()): PriceItem[] {
+  const out: PriceItem[] = [];
+  for (const raw of text.split(/\r?\n/)) {
+    const cols = raw.split(/[;\t]/).map((c) => c.trim()).filter(Boolean);
+    if (cols.length < 2) continue;
+    const priceCol = cols[cols.length - 1].replace(/[€\s]/g, "").replace(",", ".");
+    const price = Number(priceCol);
+    if (!Number.isFinite(price) || price <= 0) continue;
+    const label = cols[0];
+    const unit = cols.length >= 3 ? cols[1] : "u";
+    if (!label) continue;
+    out.push({ label, unit, unit_price_ht: Math.round(price * 100) / 100, updated_at: now });
+  }
+  return out.slice(0, 300);
+}
