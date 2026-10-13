@@ -30,7 +30,7 @@ echo "→ Application $APP (Node 22)"
 az webapp show -n "$APP" -g "$RG" -o none 2>/dev/null \
   || az webapp create -n "$APP" -g "$RG" -p "$PLAN" --runtime "NODE:22-lts" -o none
 
-az webapp config set -n "$APP" -g "$RG" --startup-file "npm run start" \
+az webapp config set -n "$APP" -g "$RG" --startup-file "node server.js" \
   --always-on true --http20-enabled true --min-tls-version 1.2 -o none
 az webapp update -n "$APP" -g "$RG" --https-only true -o none
 
@@ -41,8 +41,9 @@ APP_URL="${APP_URL:-${CURRENT_URL:-https://$HOST}}"
 
 # Réglages : on ne transmet que les variables présentes, jamais de valeur vide.
 SETTINGS=(
-  "SCM_DO_BUILD_DURING_DEPLOYMENT=true"
+  "SCM_DO_BUILD_DURING_DEPLOYMENT=false"
   "WEBSITE_NODE_DEFAULT_VERSION=~22"
+  "HOSTNAME=0.0.0.0"
   "DATA_DIR=/home/data"
   "APP_URL=$APP_URL"
 )
@@ -59,12 +60,19 @@ fi
 echo "→ Réglages (${#SETTINGS[@]} variables, valeurs non affichées)"
 az webapp config appsettings set -n "$APP" -g "$RG" --settings "${SETTINGS[@]}" -o none
 
-echo "→ Paquet de déploiement (code source, build fait par Azure)"
+echo "→ Build local (Next.js standalone)"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-ZIP="$(mktemp -d)/jingr.zip"
-(cd "$ROOT" && git archive --format=zip -o "$ZIP" HEAD)
+BUILD="$(mktemp -d)"
+# On build le code commité (HEAD), pas l'état de travail local.
+git -C "$ROOT" archive --format=tar HEAD | tar -x -C "$BUILD"
+(cd "$BUILD" && npm ci --no-audit --no-fund && npm run build)
+PKG="$BUILD/.next/standalone"
+cp -r "$BUILD/public" "$PKG/public"
+mkdir -p "$PKG/.next" && cp -r "$BUILD/.next/static" "$PKG/.next/static"
+ZIP="$BUILD/jingr.zip"
+(cd "$PKG" && zip -qr "$ZIP" .)
 
-echo "→ Déploiement (build Next.js côté Azure, 3 à 6 minutes)"
+echo "→ Déploiement (paquet prêt à démarrer, 1 à 3 minutes)"
 az webapp deploy -n "$APP" -g "$RG" --src-path "$ZIP" --type zip --async false -o none
 
 echo "→ Vérification"
