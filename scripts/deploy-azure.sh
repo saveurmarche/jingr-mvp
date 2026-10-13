@@ -73,7 +73,7 @@ ZIP="$BUILD/jingr.zip"
 (cd "$PKG" && zip -qr "$ZIP" .)
 
 echo "→ Déploiement (paquet prêt à démarrer, 1 à 3 minutes)"
-az webapp deploy -n "$APP" -g "$RG" --src-path "$ZIP" --type zip --async false \
+az webapp deploy -n "$APP" -g "$RG" --src-path "$ZIP" --type zip --async false --clean true \
   --track-status false -o none  # le suivi de démarrage d'az reste bloqué : on vérifie nous-mêmes en HTTP ci-dessous
 
 echo "→ Vérification"
