@@ -4,6 +4,7 @@ import { StartCta } from "@/components/Cta";
 import { catalog } from "@/lib/seo-catalog";
 
 const PRICE = process.env.NEXT_PUBLIC_PRICE_MONTHLY || "49";
+const PIONEER_PRICE = process.env.NEXT_PUBLIC_PIONEER_PRICE || "39";
 
 export const metadata: Metadata = {
   title: "Logiciel de devis pour artisans à Lille : devis en vocal, facture en un clic",
@@ -64,8 +65,9 @@ export default function LogicielDevisLillePage() {
         <h2 className="text-xl font-bold text-stone-900">Pilote gratuit autour de Lille</h2>
         <p className="text-stone-700">
           Nous cherchons des artisans de la métropole pour tester jingr gratuitement pendant 3 mois et nous dire
-          franchement ce qui va et ce qui ne va pas. Ensuite, {PRICE} € HT par mois si vous continuez, résiliable en
-          un message. On peut passer vous montrer en 10 minutes.
+          franchement ce qui va et ce qui ne va pas. Ensuite, {PIONEER_PRICE} € HT par mois à vie pour ces pionniers
+          (au lieu de {PRICE} €), résiliable en un message. Pas de logiciel à apprendre : tout se passe sur WhatsApp.
+          On peut passer vous montrer en 10 minutes.
         </p>
         <p className="text-sm text-stone-500">Nous intervenons notamment à : {villes.join(", ")}.</p>
       </section>

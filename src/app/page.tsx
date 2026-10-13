@@ -10,7 +10,8 @@ export const dynamic = "force-dynamic";
 
 const PRICE = process.env.NEXT_PUBLIC_PRICE_MONTHLY || "49";
 const FREE = process.env.FREE_DRAFTS || "10";
-const PIONEER_SPOTS = process.env.PIONEER_SPOTS || "20";
+const PIONEER_SPOTS = process.env.PIONEER_SPOTS || "10";
+const PIONEER_PRICE = process.env.NEXT_PUBLIC_PIONEER_PRICE || "39";
 
 const ticker = [
   "Devis avant le concurrent",
@@ -109,7 +110,7 @@ const faq: [string, string][] = [
   ["Comment mon client reçoit le devis ?", "Vous lui envoyez un lien (WhatsApp ou e-mail). Il consulte le devis, le télécharge en PDF et l'accepte en ligne. Vous êtes prévenu tout de suite."],
   ["Et la facture ?", "Chantier terminé : un clic sur « Transformer en facture ». Numérotation, échéance et mentions légales (pénalités, indemnité de 40 €, franchise de TVA si micro) sont ajoutées automatiquement."],
   ["La facture électronique obligatoire, ça me concerne ?", "Oui : depuis septembre 2026 toute entreprise doit pouvoir recevoir des factures électroniques, et les TPE/micro devront en émettre à partir de septembre 2027. jingr prépare vos factures pour passer sur une plateforme agréée le moment venu."],
-  ["C'est engageant ?", `Non. Vos ${FREE} premiers devis sont offerts, sans carte bancaire. Ensuite ${PRICE} € HT/mois, résiliable en un message.`],
+  ["C'est engageant ?", `Non. Vos ${FREE} premiers devis sont offerts, sans carte bancaire. Ensuite ${PRICE} € HT/mois (${PIONEER_PRICE} € à vie pour les ${PIONEER_SPOTS} premiers artisans), résiliable en un message.`],
 ];
 
 const jsonLd = [
@@ -149,9 +150,9 @@ export default async function HomePage() {
             <span className="text-[#7a5bb5]">Son devis était déjà parti.</span>
           </h1>
           <p className="mx-auto max-w-2xl text-lg font-light leading-relaxed text-[#6f6a7d]">
-            Vocal WhatsApp + photos → devis chiffré en quelques minutes, dans votre ton. Vous validez, votre
-            client l&apos;accepte en ligne, la facture suit en un clic. Le devis part le jour même, sans y passer
-            la soirée.
+            Sans logiciel à apprendre : un vocal WhatsApp depuis le chantier, et votre devis chiffré arrive avec
+            vos prix. Vous validez, votre client signe en ligne, la facture suit en un clic. Et une petite équipe à
+            Lille qui vient vous montrer.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <StartCta label="Essayer gratuitement" />
@@ -348,8 +349,9 @@ export default async function HomePage() {
       {/* ZONES + PIONNIERS */}
       <section id="zones" className="scroll-mt-24 space-y-5">
         <div className="rounded-2xl border border-dashed border-[#d7cbe9] bg-white/60 p-5 text-center text-sm">
-          <strong>Bêta ouverte</strong> : les {PIONEER_SPOTS} premiers artisans pionniers ont <strong>3 mois offerts</strong>{" "}
-          en échange de leurs retours, avec un accès direct aux fondateurs.{" "}
+          <strong>Pionniers</strong> : les {PIONEER_SPOTS} premiers artisans ont <strong>3 mois offerts</strong>, puis{" "}
+          <strong>{PIONEER_PRICE} € HT / mois à vie</strong> au lieu de {PRICE} €, en échange de leurs retours. On passe vous
+          montrer sur place.{" "}
           <a href="#beta" className="text-[#7a5bb5] underline">Rejoindre la bêta</a>
         </div>
         <div className="flex flex-wrap items-center justify-center gap-2">
@@ -380,7 +382,9 @@ export default async function HomePage() {
             <p className="text-sm font-light text-[#6f6a7d]">
               Devis et factures illimités, vocaux, photos, acceptation en ligne, PDF à votre nom.
             </p>
-            <p className="text-xs text-[#8a8496]">Un chantier gagné rembourse l&apos;année.</p>
+            <p className="text-xs text-[#8a8496]">
+              Pionniers : {PIONEER_PRICE} € HT / mois à vie pour les {PIONEER_SPOTS} premiers. Un chantier gagné rembourse l&apos;année.
+            </p>
           </div>
         </div>
       </section>

@@ -246,6 +246,14 @@ export const db = {
     return store.artisans.find((a) => normalizePhone(a.phone) === p) ?? null;
   },
 
+  /** Rang d'inscription de l'artisan (1 = premier inscrit), pour le prix pionnier. */
+  async artisanRank(id: string): Promise<number> {
+    const store = await readStore();
+    const sorted = [...store.artisans].sort((a, b) => a.created_at.localeCompare(b.created_at));
+    const i = sorted.findIndex((a) => a.id === id);
+    return i === -1 ? Number.MAX_SAFE_INTEGER : i + 1;
+  },
+
   async updateArtisan(
     id: string,
     patch: Partial<Pick<Artisan, "paused" | "price_list">>

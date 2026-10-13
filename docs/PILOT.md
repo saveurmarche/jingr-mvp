@@ -44,8 +44,9 @@ logiciel qui n'existe pas encore (l'export CSV existe, l'API non).
 ## 3. Réponses types
 
 **« C'est combien ? »**
-> Gratuit pendant les 3 mois du pilote, sans carte bancaire. Ensuite 49 € HT par mois si
-> vous continuez, résiliable en un message. Et vous gardez vos devis et factures.
+> Gratuit pendant les 3 mois du pilote, sans carte bancaire. Ensuite, comme vous faites partie
+> des 10 pionniers, 39 € HT par mois à vie (au lieu de 49 €), résiliable en un message. Et vous
+> gardez vos devis et factures.
 
 **« Mes données / celles de mes clients ? »**
 > Elles sont stockées en France (Azure, Paris) et ne servent qu'à faire vos devis. Pour

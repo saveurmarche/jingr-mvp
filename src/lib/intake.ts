@@ -200,7 +200,11 @@ export async function handleIncoming(msg: IncomingMessage): Promise<IntakeResult
       "Déjà 5 devis 💪 Une phrase sur jingr pour aider d'autres artisans ? Répondez « AVIS : » suivi de votre avis (publié avec votre prénom et votre métier)."
     );
   }
-  const payLink = process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK;
+  // Les pionniers (premiers artisans inscrits) ont leur propre lien au prix pionnier, s'il est configuré.
+  const pioneerSpots = Number(process.env.PIONEER_SPOTS || 10);
+  const isPioneer = (await db.artisanRank(artisan.id)) <= pioneerSpots;
+  const payLink =
+    (isPioneer && process.env.NEXT_PUBLIC_STRIPE_PIONEER_LINK) || process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK;
   if (count === FREE_DRAFTS && payLink) {
     lines.push(
       "",

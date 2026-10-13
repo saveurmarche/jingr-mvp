@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.APP_URL || "https://jingr.ai"),
   title: "jingr — le devis part avant celui du concurrent",
   description:
-    "Plombiers, électriciens, artisans du bâtiment : un vocal WhatsApp depuis le chantier, un devis chiffré à relire en quelques minutes, dans votre ton. Votre client l'accepte en ligne, la facture suit en un clic.",
+    "Artisans du bâtiment, sans logiciel à apprendre : un vocal WhatsApp depuis le chantier, un devis chiffré avec vos prix, signé en ligne par votre client, la facture en un clic. Une équipe à Lille.",
   openGraph: { locale: "fr_FR", type: "website", siteName: "jingr" },
 };
 
