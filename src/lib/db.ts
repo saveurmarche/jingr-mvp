@@ -3,6 +3,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import type {
   Artisan,
+  BetaSignup,
   ClientLink,
   DbShape,
   Invoice,
@@ -30,6 +31,7 @@ const emptyDb = (): DbShape => ({
   invoices: [],
   testimonials: [],
   client_links: [],
+  beta_signups: [],
 });
 
 function hasSupabaseConfig(): boolean {
@@ -582,6 +584,22 @@ export const db = {
     });
     await writeStore(store);
     return { draft, already: false };
+  },
+
+  async addBetaSignup(input: Omit<BetaSignup, "id" | "created_at">): Promise<{ signup: BetaSignup; duplicate: boolean }> {
+    const store = await readStore();
+    const email = input.email.trim().toLowerCase();
+    const existing = store.beta_signups.find((b) => b.email === email);
+    if (existing) return { signup: existing, duplicate: true };
+    const signup: BetaSignup = { ...input, email, id: randomUUID(), created_at: nowIso() };
+    store.beta_signups.push(signup);
+    await writeStore(store);
+    return { signup, duplicate: false };
+  },
+
+  async listBetaSignups(): Promise<BetaSignup[]> {
+    const store = await readStore();
+    return store.beta_signups.slice().sort((a, b) => b.created_at.localeCompare(a.created_at));
   },
 
   async reset(): Promise<void> {

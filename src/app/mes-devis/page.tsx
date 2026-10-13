@@ -109,7 +109,7 @@ export default function MesDevisPage() {
         jobs.length === 0 ? (
           <div className="card text-stone-600">
             Aucun devis pour ce numéro.{" "}
-            <Link href="/go" className="text-[#6B4EFF] underline">
+            <Link href="/go" className="text-[#7b5ea7] underline">
               Créer un chantier
             </Link>
           </div>
@@ -129,7 +129,7 @@ export default function MesDevisPage() {
                   </div>
                   <div className="text-right text-sm">
                     {j.draft ? (
-                      <p className="font-semibold text-[#6B4EFF]">
+                      <p className="font-semibold text-[#7b5ea7]">
                         {eur(j.draft.total_ttc)} TTC
                       </p>
                     ) : (

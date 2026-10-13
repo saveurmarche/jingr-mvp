@@ -17,7 +17,7 @@ export default async function ReviewPage({
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-sm font-semibold text-[#6B4EFF]">Revue du brouillon</p>
+        <p className="text-sm font-semibold text-[#7b5ea7]">Revue du brouillon</p>
         <h1 className="text-2xl font-bold text-stone-900">{data.draft.title}</h1>
         <p className="mt-1 text-stone-600">
           Client : {data.job.client_name}

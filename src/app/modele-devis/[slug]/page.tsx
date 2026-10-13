@@ -39,7 +39,7 @@ export default async function ModeleDevisPage({
   return (
     <article className="space-y-8">
       <header className="space-y-3">
-        <p className="text-sm font-semibold uppercase tracking-wide text-[#6B4EFF]">
+        <p className="text-sm font-semibold uppercase tracking-wide text-[#7b5ea7]">
           Modèle de devis {e.metier}
         </p>
         <h1 className="text-3xl font-bold text-stone-900">
@@ -75,7 +75,7 @@ export default async function ModeleDevisPage({
         <div className="text-right text-sm">
           <div>Total HT : <strong>{eur(t.ht)}</strong></div>
           <div>TVA {String(e.tva).replace(".", ",")} % : <strong>{eur(t.tva)}</strong></div>
-          <div className="text-base text-[#6B4EFF]">Total TTC : <strong>{eur(t.ttc)}</strong></div>
+          <div className="text-base text-[#7b5ea7]">Total TTC : <strong>{eur(t.ttc)}</strong></div>
         </div>
         <p className="text-xs text-stone-500">
           Prix indicatifs pour l&apos;exemple : adaptez-les à vos fournisseurs, votre secteur et votre marge.
@@ -113,7 +113,7 @@ export default async function ModeleDevisPage({
         <h2 className="font-semibold text-stone-700">Autres modèles de devis</h2>
         <div className="flex flex-wrap gap-x-4 gap-y-1">
           {others.map((o) => (
-            <Link key={o.slug} href={`/modele-devis/${o.slug}`} className="text-[#6B4EFF] hover:underline">
+            <Link key={o.slug} href={`/modele-devis/${o.slug}`} className="text-[#7b5ea7] hover:underline">
               {o.title}
             </Link>
           ))}

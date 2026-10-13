@@ -14,6 +14,7 @@ export async function GET(req: NextRequest) {
     ok: true,
     testimonials: await db.listTestimonials(),
     deletion_requests: deletions.map((d) => ({ phone: d.from_phone, at: d.created_at })),
+    beta_signups: await db.listBetaSignups(),
   });
 }
 

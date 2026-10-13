@@ -158,7 +158,7 @@ export function ReviewEditor({
 
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="font-semibold text-[#6B4EFF]">Lignes du devis</h2>
+            <h2 className="font-semibold text-[#7b5ea7]">Lignes du devis</h2>
             <button type="button" className="btn-secondary text-sm py-2" onClick={addLine}>
               + Ligne
             </button>
@@ -252,7 +252,7 @@ export function ReviewEditor({
 
         {status === "validated" ? (
           <div className="rounded-xl border border-[#c4b5fd] bg-[#faf8ff] p-4 space-y-3">
-            <p className="font-semibold text-[#6B4EFF]">Facturation</p>
+            <p className="font-semibold text-[#7b5ea7]">Facturation</p>
             {invoice ? (
               <>
                 <p className="text-sm text-stone-700">
@@ -415,7 +415,7 @@ function SendToClient({
 
   return (
     <div className="rounded-xl border border-[#c4b5fd] bg-[#faf8ff] p-4 space-y-3">
-      <p className="font-semibold text-[#6B4EFF]">Envoyer au client</p>
+      <p className="font-semibold text-[#7b5ea7]">Envoyer au client</p>
       {acceptedAt ? (
         <p className="text-sm font-medium text-emerald-700">
           ✅ Accepté par {acceptedBy || "le client"} le {new Date(acceptedAt).toLocaleDateString("fr-FR")}

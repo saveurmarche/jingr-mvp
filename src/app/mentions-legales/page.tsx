@@ -16,7 +16,7 @@ export default function MentionsLegalesPage() {
         <p>SIRET : {company.siret}</p>
         <p>Siège : {company.address}</p>
         <p>
-          Contact : <a className="text-[#6B4EFF] underline" href={`mailto:${company.email}`}>{company.email}</a>
+          Contact : <a className="text-[#7b5ea7] underline" href={`mailto:${company.email}`}>{company.email}</a>
         </p>
         <p>Directeur de la publication : {company.director}</p>
       </section>
@@ -27,7 +27,7 @@ export default function MentionsLegalesPage() {
       <section className="space-y-1">
         <h2 className="text-lg font-bold text-stone-900">Données personnelles</h2>
         <p>
-          Voir la <a className="text-[#6B4EFF] underline" href="/confidentialite">politique de confidentialité</a>.
+          Voir la <a className="text-[#7b5ea7] underline" href="/confidentialite">politique de confidentialité</a>.
         </p>
       </section>
     </article>

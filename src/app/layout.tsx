@@ -1,47 +1,72 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Logo } from "@/components/Logo";
 import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.APP_URL || "https://jingr.ai"),
-  title: "jingr — vos devis et factures d'artisan dictés sur WhatsApp",
+  title: "jingr — le devis part avant celui du concurrent",
   description:
-    "Plombiers, chauffagistes : dictez le chantier sur WhatsApp, recevez un devis chiffré à relire en quelques minutes. Facture en un clic. 10 devis offerts.",
+    "Plombiers, chauffagistes : un vocal WhatsApp depuis le chantier, un devis chiffré à relire en quelques minutes, dans votre ton. Votre client l'accepte en ligne, la facture suit en un clic.",
   openGraph: { locale: "fr_FR", type: "website", siteName: "jingr" },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+const nav: [string, string][] = [
+  ["Produit", "/#produit"],
+  ["Process", "/#process"],
+  ["Démo", "/#demo"],
+  ["Zones", "/#zones"],
+  ["Tarifs", "/#tarifs"],
+  ["FAQ", "/#faq"],
+  ["Bêta", "/#beta"],
+];
+
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="fr">
-      <body className="min-h-screen antialiased">
-        <header className="border-b border-[#ebe4da] bg-[#F7F4EF]/95 backdrop-blur sticky top-0 z-10">
-          <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
-            <Link href="/" className="text-xl font-bold tracking-tight text-[#6B4EFF]">
-              jingr
-            </Link>
-            <nav className="flex gap-3 text-sm">
-              <Link href="/#tarifs" className="text-stone-600 hover:text-[#6B4EFF]">
-                Tarif
-              </Link>
-              <Link href="/mes-devis" className="text-stone-600 hover:text-[#6B4EFF]">
-                Mes devis
-              </Link>
-              <Link href="/go" className="font-semibold text-[#6B4EFF]">
-                Essayer
-              </Link>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        />
+      </head>
+      <body className="min-h-screen">
+        <header className="sticky top-0 z-20 border-b border-[#ece7ef] bg-[#f8f6f1]/85 backdrop-blur">
+          <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
+            <Logo />
+            <nav className="hidden gap-6 text-sm text-[#4a4459] md:flex">
+              {nav.map(([label, href]) => (
+                <Link key={href} href={href} className="hover:text-[#7a5bb5]">
+                  {label}
+                </Link>
+              ))}
             </nav>
+            <Link href="/go" className="btn-primary !px-4 !py-2 text-sm">
+              Essayer
+            </Link>
           </div>
         </header>
-        <main className="mx-auto max-w-3xl px-4 py-8">{children}</main>
-        <footer className="mx-auto max-w-3xl space-y-2 px-4 pb-10 pt-4 text-center text-xs text-stone-400">
-          <p>jingr — devis et factures pour artisans. Rien n&apos;est envoyé à vos clients sans votre validation.</p>
-          <p className="space-x-3">
-            <Link href="/confidentialite" className="hover:text-stone-600">Confidentialité</Link>
-            <Link href="/mentions-legales" className="hover:text-stone-600">Mentions légales</Link>
-            <Link href="/facture-electronique-artisan" className="hover:text-stone-600">Facture électronique</Link>
-          </p>
+        <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+        <footer className="border-t border-[#ece7ef] bg-[#f8f6f1]">
+          <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-6 text-xs text-[#6f6a7d]">
+            <Logo />
+            <nav className="flex flex-wrap gap-x-4 gap-y-1">
+              <Link href="/#demo" className="hover:text-[#7a5bb5]">Démo</Link>
+              <Link href="/#zones" className="hover:text-[#7a5bb5]">Zones</Link>
+              <Link href="/#faq" className="hover:text-[#7a5bb5]">FAQ</Link>
+              <Link href="/#beta" className="hover:text-[#7a5bb5]">Bêta</Link>
+              <Link href="/go" className="hover:text-[#7a5bb5]">/go</Link>
+              <Link href="/mes-devis" className="hover:text-[#7a5bb5]">Mes devis</Link>
+              <Link href="/facture-electronique-artisan" className="hover:text-[#7a5bb5]">Facture électronique</Link>
+              <span>© {new Date().getFullYear()} jingr.ai</span>
+              <Link href="/mentions-legales" className="hover:text-[#7a5bb5]">Mentions légales</Link>
+              <Link href="/confidentialite" className="hover:text-[#7a5bb5]">Confidentialité / RGPD</Link>
+              <a href="mailto:contact@jingr.ai" className="hover:text-[#7a5bb5]">contact@jingr.ai</a>
+            </nav>
+          </div>
         </footer>
       </body>
     </html>

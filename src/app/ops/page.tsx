@@ -30,6 +30,9 @@ export default function OpsPage() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [testimonials, setTestimonials] = useState<TestimonialRow[]>([]);
   const [deletions, setDeletions] = useState<{ phone: string; at: string }[]>([]);
+  const [beta, setBeta] = useState<
+    { id: string; first_name: string; last_name?: string | null; email: string; trade?: string | null; phone?: string | null; message?: string | null; created_at: string }[]
+  >([]);
 
   const load = useCallback(async () => {
     const headers = { "x-ops-password": password };
@@ -43,6 +46,7 @@ export default function OpsPage() {
     if (tJson.ok) {
       setTestimonials(tJson.testimonials);
       setDeletions(tJson.deletion_requests ?? []);
+      setBeta(tJson.beta_signups ?? []);
     }
   }, [password]);
 
@@ -133,6 +137,26 @@ export default function OpsPage() {
           ))}
         </section>
       ) : null}
+
+      <section className="space-y-3">
+        <h1 className="text-2xl font-bold">Demandes bêta ({beta.length})</h1>
+        {beta.length === 0 ? (
+          <p className="text-stone-500">Aucune demande pour l&apos;instant.</p>
+        ) : (
+          beta.map((b) => (
+            <div key={b.id} className="card space-y-1 text-sm">
+              <p className="font-semibold">
+                {b.first_name} {b.last_name ?? ""} · {b.trade || "métier ?"}
+              </p>
+              <p>
+                <a className="text-[#7b5ea7] underline" href={`mailto:${b.email}`}>{b.email}</a>
+                {b.phone ? ` · ${b.phone}` : ""} · {new Date(b.created_at).toLocaleDateString("fr-FR")}
+              </p>
+              {b.message ? <p className="text-stone-600">« {b.message} »</p> : null}
+            </div>
+          ))
+        )}
+      </section>
 
       <section className="space-y-3">
         <h1 className="text-2xl font-bold">Avis artisans</h1>

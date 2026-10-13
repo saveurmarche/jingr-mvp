@@ -116,6 +116,19 @@ export type ClientLink = {
   created_at: string;
 };
 
+/** Demande « Rejoindre la bêta » depuis le site */
+export type BetaSignup = {
+  id: string;
+  first_name: string;
+  last_name?: string | null;
+  email: string;
+  trade?: string | null;
+  phone?: string | null;
+  message?: string | null;
+  city?: string | null;
+  created_at: string;
+};
+
 export type InvoiceStatus = "issued" | "paid";
 
 export type Invoice = {
@@ -163,6 +176,7 @@ export type DbShape = {
   invoices: Invoice[];
   testimonials: Testimonial[];
   client_links: ClientLink[];
+  beta_signups: BetaSignup[];
 };
 
 /** Defaults for artisans loaded from older store.json without new fields */

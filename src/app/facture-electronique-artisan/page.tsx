@@ -12,7 +12,7 @@ export default function FactureElectroniquePage() {
   return (
     <article className="space-y-8">
       <header className="space-y-3">
-        <p className="text-sm font-semibold uppercase tracking-wide text-[#6B4EFF]">Guide artisan</p>
+        <p className="text-sm font-semibold uppercase tracking-wide text-[#7b5ea7]">Guide artisan</p>
         <h1 className="text-3xl font-bold text-stone-900">
           Facture électronique obligatoire : ce qui change pour les artisans
         </h1>

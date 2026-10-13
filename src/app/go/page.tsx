@@ -65,7 +65,7 @@ export default function GoPage() {
 
       <form onSubmit={onSubmit} className="card space-y-4" encType="multipart/form-data">
         <fieldset className="space-y-3">
-          <legend className="mb-1 text-sm font-semibold text-[#6B4EFF]">
+          <legend className="mb-1 text-sm font-semibold text-[#7b5ea7]">
             Vous (artisan)
           </legend>
           <div>
@@ -93,7 +93,7 @@ export default function GoPage() {
         </fieldset>
 
         <fieldset className="space-y-3">
-          <legend className="mb-1 text-sm font-semibold text-[#6B4EFF]">
+          <legend className="mb-1 text-sm font-semibold text-[#7b5ea7]">
             Préférences devis
           </legend>
           <div className="flex items-center justify-between gap-3 rounded-xl border border-[#ebe4da] bg-[#fffcf8] px-3 py-3">
@@ -109,7 +109,7 @@ export default function GoPage() {
               aria-checked={tutoiement}
               onClick={() => setTutoiement((v) => !v)}
               className={`relative h-8 w-14 rounded-full transition ${
-                tutoiement ? "bg-[#6B4EFF]" : "bg-stone-300"
+                tutoiement ? "bg-[#7b5ea7]" : "bg-stone-300"
               }`}
             >
               <span
@@ -144,7 +144,7 @@ export default function GoPage() {
         </fieldset>
 
         <fieldset className="space-y-3">
-          <legend className="mb-1 text-sm font-semibold text-[#6B4EFF]">
+          <legend className="mb-1 text-sm font-semibold text-[#7b5ea7]">
             Le chantier
           </legend>
           <div>
@@ -235,7 +235,7 @@ export default function GoPage() {
         <div className={`card ${result.ok ? "border-[#c4b5fd]" : "border-red-200"}`}>
           {result.ok ? (
             <div className="space-y-3">
-              <p className="font-semibold text-[#6B4EFF]">Brouillon prêt</p>
+              <p className="font-semibold text-[#7b5ea7]">Brouillon prêt</p>
               <p className="text-sm text-stone-600">
                 Job {result.job_id}. Relisez et validez avant tout envoi client.
               </p>

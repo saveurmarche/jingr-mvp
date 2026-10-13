@@ -27,7 +27,7 @@ export default function ConfidentialitePage() {
       <H2>1. Qui est responsable ?</H2>
       <p>
         {company.name} ({company.form}), SIRET {company.siret}, {company.address}.
-        Contact : <a className="text-[#6B4EFF] underline" href={`mailto:${company.email}`}>{company.email}</a>.
+        Contact : <a className="text-[#7b5ea7] underline" href={`mailto:${company.email}`}>{company.email}</a>.
       </p>
       <p>Deux situations différentes :</p>
       <ul className="list-disc space-y-1 pl-5">
@@ -95,12 +95,12 @@ export default function ConfidentialitePage() {
       <p>
         Vous pouvez accéder à vos données, les corriger, les exporter, les supprimer, vous opposer
         à un traitement ou en demander la limitation. Écrivez à{" "}
-        <a className="text-[#6B4EFF] underline" href={`mailto:${company.email}`}>{company.email}</a>{" "}
+        <a className="text-[#7b5ea7] underline" href={`mailto:${company.email}`}>{company.email}</a>{" "}
         ou envoyez « SUPPRIMER MON COMPTE » sur WhatsApp. Réponse sous un mois.
       </p>
       <p>
         Si vous estimez que vos droits ne sont pas respectés, vous pouvez saisir la CNIL
-        (<a className="text-[#6B4EFF] underline" href="https://www.cnil.fr/fr/plaintes">cnil.fr/plaintes</a>).
+        (<a className="text-[#7b5ea7] underline" href="https://www.cnil.fr/fr/plaintes">cnil.fr/plaintes</a>).
       </p>
       <p>
         Les clients de nos artisans qui souhaitent exercer leurs droits s&apos;adressent à

@@ -9,7 +9,7 @@ import {
 import { artisanDefaults, type Artisan, type Invoice, type Job, type QuoteDraft } from "./types";
 
 const cream = "#F7F4EF";
-const violet = "#6B4EFF";
+const violet = "#7b5ea7";
 const violetSoft = "#efe9ff";
 const ink = "#1c1917";
 const muted = "#57534e";

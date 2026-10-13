@@ -24,7 +24,7 @@ export default async function ClientQuotePage({ params }: { params: Promise<{ to
   return (
     <div className="space-y-6">
       <div className="card space-y-1">
-        <p className="text-sm font-semibold uppercase tracking-wide text-[#6B4EFF]">Devis</p>
+        <p className="text-sm font-semibold uppercase tracking-wide text-[#7b5ea7]">Devis</p>
         <h1 className="text-2xl font-bold text-stone-900">{draft.title}</h1>
         <p className="text-stone-600">
           De <strong>{company}</strong>
@@ -68,7 +68,7 @@ export default async function ClientQuotePage({ params }: { params: Promise<{ to
           ) : (
             <div>TVA : <strong>{eur(draft.total_tva)}</strong></div>
           )}
-          <div className="text-base text-[#6B4EFF]">
+          <div className="text-base text-[#7b5ea7]">
             {franchise ? "Net à payer" : "Total TTC"} : <strong>{eur(franchise ? draft.total_ht : draft.total_ttc)}</strong>
           </div>
         </div>
@@ -82,7 +82,7 @@ export default async function ClientQuotePage({ params }: { params: Promise<{ to
       />
 
       <p className="text-center text-sm">
-        <a className="text-[#6B4EFF] underline" href={`/api/d/${token}/pdf`}>Télécharger le devis en PDF</a>
+        <a className="text-[#7b5ea7] underline" href={`/api/d/${token}/pdf`}>Télécharger le devis en PDF</a>
       </p>
     </div>
   );
