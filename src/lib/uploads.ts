@@ -3,7 +3,7 @@ import { promises as fs } from "fs";
 import path from "path";
 
 const PUBLIC_UPLOADS = path.join(process.cwd(), "public", "uploads");
-const DATA_UPLOADS = path.join(process.cwd(), "data", "uploads");
+const DATA_UPLOADS = path.join(process.env.DATA_DIR || path.join(process.cwd(), "data"), "uploads");
 
 const ALLOWED = new Set([
   "image/jpeg",

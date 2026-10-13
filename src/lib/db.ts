@@ -14,7 +14,8 @@ import type {
   ReviewToken,
 } from "./types";
 
-const DATA_DIR = path.join(process.cwd(), "data");
+// Sur Azure App Service, DATA_DIR=/home/data : /home est persistant, le dossier de l'app ne l'est pas.
+const DATA_DIR = process.env.DATA_DIR || path.join(process.cwd(), "data");
 const STORE_PATH = path.join(DATA_DIR, "store.json");
 
 const emptyDb = (): DbShape => ({

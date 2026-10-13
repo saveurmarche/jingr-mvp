@@ -9,6 +9,21 @@ Les clés ne se collent jamais dans un chat ni dans le dépôt. Elles vont dans 
 « Variables d'environnement » d'Azure (et, pour qu'un agent Claude puisse déployer, dans les
 secrets de l'environnement cloud).
 
+## En deux commandes
+
+```bash
+bash scripts/deploy-azure.sh        # crée l'App Service si besoin, règle les variables, déploie
+bash scripts/dns-ovh.sh             # montre ce qui changerait dans la zone DNS (aucune modification)
+bash scripts/dns-ovh.sh --confirm   # bascule jingr.ai + www vers Azure, active le HTTPS managé
+```
+
+Les deux scripts marchent depuis une session Claude qui a les variables `AZURE_*` et `OVH_*`,
+ou depuis [shell.azure.com](https://shell.azure.com) après un `git clone` du dépôt.
+`dns-ovh.sh` ne modifie que `@`, `www` et les TXT `asuid` : la messagerie OVH (MX, mail, DKIM)
+reste intacte. Les données de l'app sont stockées dans `/home/data` (persistant sur App Service).
+
+Le détail des étapes, si besoin de les faire à la main :
+
 ## 1. Azure : héberger l'application
 
 ```bash
