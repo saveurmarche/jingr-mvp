@@ -1,3 +1,4 @@
+import { checkOpsPassword } from "@/lib/ops-auth";
 import { NextRequest, NextResponse, after } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
@@ -107,9 +108,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true });
   }
 
-  // Mode test JSON
+  // Mode test JSON. En production il exige le mot de passe ops : sinon n'importe qui pourrait
+  // créer des devis (crédit IA) ou envoyer STOP au nom d'un artisan.
   if (process.env.WHATSAPP_TEST_MODE === "false") {
     return NextResponse.json({ ok: false, error: "Mode test désactivé" }, { status: 403 });
+  }
+  if (process.env.NODE_ENV === "production" && !checkOpsPassword(req.headers.get("x-ops-password"))) {
+    return NextResponse.json({ ok: false, error: "Mode test réservé (x-ops-password)" }, { status: 401 });
   }
   try {
     const data = testSchema.parse(json);

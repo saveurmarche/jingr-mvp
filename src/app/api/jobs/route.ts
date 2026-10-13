@@ -5,6 +5,7 @@ import { generateDraftForJob } from "@/lib/draft-pipeline";
 import { saveBase64Photo, saveFilePhoto } from "@/lib/uploads";
 import { transcribeAudio } from "@/lib/ai";
 import { checkOpsPassword } from "@/lib/ops-auth";
+import { clientIp, rateLimited } from "@/lib/rate-limit";
 
 const schema = z.object({
   artisan_name: z.string().min(1),
@@ -104,6 +105,9 @@ async function parseRequest(req: NextRequest): Promise<{
 }
 
 export async function POST(req: NextRequest) {
+  if (rateLimited(`jobs:${clientIp(req.headers)}`, 20, 60 * 60 * 1000)) {
+    return NextResponse.json({ ok: false, error: "Trop de devis en une heure, réessayez plus tard." }, { status: 429 });
+  }
   try {
     const { data, files, audio } = await parseRequest(req);
 
@@ -130,7 +134,9 @@ export async function POST(req: NextRequest) {
             : 10
           : undefined;
 
-    const artisan = await db.findOrCreateArtisan({
+    // Un numéro existant ne voit jamais son profil modifié depuis ce formulaire public :
+    // les réglages passent par le lien de relecture (jeton) uniquement.
+    const artisan = (await db.findArtisanByPhone(data.artisan_phone)) ?? await db.findOrCreateArtisan({
       name: data.artisan_name,
       phone: data.artisan_phone,
       trade: data.artisan_trade,
