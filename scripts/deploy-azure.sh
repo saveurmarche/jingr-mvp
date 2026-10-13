@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Déploie jingr sur Azure App Service (Linux, Node 20), région France Centre.
+# Déploie jingr sur Azure App Service (Linux, Node 22), région France Centre.
 # Fonctionne depuis une session Claude (variables AZURE_* présentes) ou depuis shell.azure.com
 # (déjà connecté : les variables AZURE_* sont alors inutiles).
 #
@@ -26,9 +26,9 @@ echo "→ Plan App Service $PLAN ($SKU, Linux)"
 az appservice plan show -n "$PLAN" -g "$RG" -o none 2>/dev/null \
   || az appservice plan create -n "$PLAN" -g "$RG" --is-linux --sku "$SKU" -o none
 
-echo "→ Application $APP (Node 20)"
+echo "→ Application $APP (Node 22)"
 az webapp show -n "$APP" -g "$RG" -o none 2>/dev/null \
-  || az webapp create -n "$APP" -g "$RG" -p "$PLAN" --runtime "NODE:20-lts" -o none
+  || az webapp create -n "$APP" -g "$RG" -p "$PLAN" --runtime "NODE:22-lts" -o none
 
 az webapp config set -n "$APP" -g "$RG" --startup-file "npm run start" \
   --always-on true --http20-enabled true --min-tls-version 1.2 -o none
@@ -42,7 +42,7 @@ APP_URL="${APP_URL:-${CURRENT_URL:-https://$HOST}}"
 # Réglages : on ne transmet que les variables présentes, jamais de valeur vide.
 SETTINGS=(
   "SCM_DO_BUILD_DURING_DEPLOYMENT=true"
-  "WEBSITE_NODE_DEFAULT_VERSION=~20"
+  "WEBSITE_NODE_DEFAULT_VERSION=~22"
   "DATA_DIR=/home/data"
   "APP_URL=$APP_URL"
 )
