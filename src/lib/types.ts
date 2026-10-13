@@ -92,6 +92,10 @@ export type QuoteDraft = {
   /** Acceptation en ligne par le client (« Bon pour accord ») */
   accepted_at?: string | null;
   accepted_by?: string | null;
+  /** Lignes telles que proposées par jingr, pour mesurer les corrections de l'artisan */
+  generated_line_items?: QuoteLineItem[];
+  /** Nombre de lignes ajoutées, supprimées ou modifiées avant validation */
+  edit_count?: number;
   created_at: string;
   updated_at: string;
 };

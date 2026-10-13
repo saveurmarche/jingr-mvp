@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { recalcTotals } from "@/lib/draft-pipeline";
 import { hasUnconfirmedEstimates, mergeIntoPriceList } from "@/lib/price-list";
+import { countLineEdits } from "@/lib/pilot-metrics";
 import type { QuoteLineItem } from "@/lib/types";
 
 const lineSchema = z.object({
@@ -72,6 +73,10 @@ export async function POST(
         body.action === "validate"
           ? new Date().toISOString()
           : draft.validated_at,
+      edit_count:
+        body.action === "validate"
+          ? countLineEdits(draft.generated_line_items, line_items)
+          : draft.edit_count,
     });
 
     if (body.action === "validate") {
@@ -84,7 +89,10 @@ export async function POST(
       await db.addEvent({
         quote_draft_id: draft.id,
         event_type: "validated",
-        payload: { note: "Validé par l'artisan — prêt à être envoyé manuellement" },
+        payload: {
+          note: "Validé par l'artisan — prêt à être envoyé manuellement",
+          edit_count: updated.edit_count ?? null,
+        },
       });
     } else {
       await db.addEvent({

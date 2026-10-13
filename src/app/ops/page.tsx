@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
+import type { PilotMetrics } from "@/lib/pilot-metrics";
 
 type TestimonialRow = {
   id: string;
@@ -29,6 +30,7 @@ export default function OpsPage() {
   const [jobs, setJobs] = useState<JobRow[]>([]);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [testimonials, setTestimonials] = useState<TestimonialRow[]>([]);
+  const [pilot, setPilot] = useState<PilotMetrics | null>(null);
   const [deletions, setDeletions] = useState<{ phone: string; at: string }[]>([]);
   const [beta, setBeta] = useState<
     { id: string; first_name: string; last_name?: string | null; email: string; trade?: string | null; phone?: string | null; message?: string | null; software?: string | null; created_at: string }[]
@@ -47,6 +49,7 @@ export default function OpsPage() {
       setTestimonials(tJson.testimonials);
       setDeletions(tJson.deletion_requests ?? []);
       setBeta(tJson.beta_signups ?? []);
+      setPilot(tJson.pilot ?? null);
     }
   }, [password]);
 
@@ -125,6 +128,8 @@ export default function OpsPage() {
 
   return (
     <div className="space-y-6">
+      {pilot ? <PilotCard m={pilot} /> : null}
+
       {deletions.length ? (
         <section className="card space-y-2 border-red-200">
           <h1 className="text-lg font-bold text-red-700">
@@ -236,5 +241,53 @@ export default function OpsPage() {
         )}
       </div>
     </div>
+  );
+}
+
+function Gate({ label, value, target, ok }: { label: string; value: string; target: string; ok: boolean | null }) {
+  const tone = ok === null ? "bg-stone-50" : ok ? "bg-emerald-50" : "bg-amber-50";
+  return (
+    <div className={`rounded-xl p-3 ${tone}`}>
+      <div className="text-2xl font-bold">{value}</div>
+      <div className="text-xs text-stone-600">{label}</div>
+      <div className="text-xs text-stone-400">objectif : {target}</div>
+    </div>
+  );
+}
+
+/** Les 4 critères de décision du pilote (docs/PILOT.md), sur les 7 derniers jours. */
+function PilotCard({ m }: { m: PilotMetrics }) {
+  return (
+    <section className="card space-y-3">
+      <h1 className="text-2xl font-bold">Pilote · {m.window_days} derniers jours</h1>
+      <div className="grid gap-3 sm:grid-cols-4">
+        <Gate label="artisans actifs" value={`${m.artisans_active} / ${m.artisans_total}`} target="6 sur 10" ok={m.artisans_total ? m.artisans_active >= 6 : null} />
+        <Gate
+          label="devis validés avec ≤ 2 corrections"
+          value={m.validated_few_edits_pct === null ? "—" : `${m.validated_few_edits_pct} %`}
+          target="70 %"
+          ok={m.validated_few_edits_pct === null ? null : m.validated_few_edits_pct >= 70}
+        />
+        <Gate label="devis créés / validés" value={`${m.drafts} / ${m.validated}`} target="—" ok={null} />
+        <Gate label="acceptés par le client" value={String(m.accepted_by_client)} target="—" ok={null} />
+      </div>
+      <p className="text-xs text-stone-500">
+        « Erreur arrivée chez un client » et « prêts à payer » se suivent à la main (appels, retours).
+      </p>
+      {m.per_artisan.some((a) => a.drafts) ? (
+        <table className="w-full text-sm">
+          <thead className="text-left text-stone-500">
+            <tr><th>Artisan</th><th>Devis</th><th>Validés</th><th>Corrections moy.</th><th>Acceptés</th></tr>
+          </thead>
+          <tbody>
+            {m.per_artisan.filter((a) => a.drafts).map((a) => (
+              <tr key={a.phone} className="border-t border-stone-100">
+                <td>{a.name}</td><td>{a.drafts}</td><td>{a.validated}</td><td>{a.avg_edits ?? "—"}</td><td>{a.accepted}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : null}
+    </section>
   );
 }

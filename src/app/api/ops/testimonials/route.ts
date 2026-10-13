@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { checkOpsPassword } from "@/lib/ops-auth";
+import { pilotMetrics } from "@/lib/pilot-metrics";
 
 function unauthorized() {
   return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
@@ -15,6 +16,7 @@ export async function GET(req: NextRequest) {
     testimonials: await db.listTestimonials(),
     deletion_requests: deletions.map((d) => ({ phone: d.from_phone, at: d.created_at })),
     beta_signups: await db.listBetaSignups(),
+    pilot: pilotMetrics(await db.snapshot()),
   });
 }
 

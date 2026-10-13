@@ -308,6 +308,7 @@ export const db = {
       title: draft.title,
       intro: draft.intro ?? null,
       line_items: draft.line_items,
+      generated_line_items: draft.generated_line_items ?? draft.line_items,
       notes: draft.notes ?? null,
       total_ht: draft.total_ht,
       total_tva: draft.total_tva,
@@ -320,6 +321,12 @@ export const db = {
     store.quote_drafts.push(created);
     await writeStore(store);
     return created;
+  },
+
+  /** Lecture seule de l'ensemble des données, pour les indicateurs du pilote (/ops). */
+  async snapshot(): Promise<Pick<DbShape, "artisans" | "jobs" | "quote_drafts">> {
+    const store = await readStore();
+    return { artisans: store.artisans, jobs: store.jobs, quote_drafts: store.quote_drafts };
   },
 
   async getDraft(id: string): Promise<QuoteDraft | null> {

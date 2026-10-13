@@ -99,3 +99,28 @@ test("title: client name always present", async () => {
   assert.equal(inferTitle(job, "Devis pour travaux de plomberie"), "Devis pour travaux de plomberie — Mme Lefebvre");
   assert.equal(inferTitle(job, "Devis Mme Lefebvre — sèche-serviettes"), "Devis Mme Lefebvre — sèche-serviettes");
 });
+
+test("pilot: edits counted per line (changed, added, removed)", async () => {
+  const { countLineEdits, pilotMetrics } = await import("../src/lib/pilot-metrics");
+  const a = line({ id: "a" }), b = line({ id: "b" }), c = line({ id: "c" });
+  assert.equal(countLineEdits([a, b, c], [a, { ...b, unit_price_ht: 120 }, line({ id: "d" })]), 3);
+  assert.equal(countLineEdits([a], [a]), 0);
+  assert.equal(countLineEdits(undefined, [a]), 0);
+  const now = new Date("2026-10-14T12:00:00Z");
+  const m = pilotMetrics(
+    {
+      artisans: [{ id: "x", name: "A", phone: "+33600000001", trade: "bâtiment", created_at: "" }],
+      jobs: [{ id: "j", artisan_id: "x" } as never],
+      quote_drafts: [
+        { id: "d1", job_id: "j", status: "validated", validated_at: "2026-10-13", edit_count: 1, created_at: "2026-10-13T10:00:00Z" } as never,
+        { id: "d2", job_id: "j", status: "validated", validated_at: "2026-10-13", edit_count: 5, created_at: "2026-10-13T11:00:00Z" } as never,
+        { id: "d3", job_id: "j", status: "draft", created_at: "2026-09-01T00:00:00Z" } as never,
+      ],
+    },
+    now
+  );
+  assert.equal(m.artisans_active, 1);
+  assert.equal(m.drafts, 2);
+  assert.equal(m.validated_few_edits_pct, 50);
+  assert.equal(m.per_artisan[0].avg_edits, 3);
+});
