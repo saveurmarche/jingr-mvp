@@ -37,9 +37,11 @@ function eur(n: number) {
 
 export async function handleIncoming(msg: IncomingMessage): Promise<IntakeResult> {
   let text = msg.text?.trim() || "";
+  let audioFailed = false;
   if (msg.audio) {
     const transcript = await transcribeAudio(msg.audio.buffer, msg.audio.mime);
     if (transcript) text = [text, transcript].filter(Boolean).join("\n");
+    else audioFailed = true;
   }
   const captions = (msg.images || []).map((i) => i.caption).filter(Boolean);
   text = [text, ...captions].filter(Boolean).join("\n").trim();
@@ -115,6 +117,15 @@ export async function handleIncoming(msg: IncomingMessage): Promise<IntakeResult
       ok: false,
       error: "avis_enregistre",
       reply: "Merci beaucoup 🙏 Votre avis sera relu puis publié sur jingr.ai (prénom, initiale du nom et métier uniquement). Répondez « RETIRER AVIS » à tout moment pour le supprimer.",
+    };
+  }
+
+  if (text.length < 5 && audioFailed) {
+    return {
+      ok: false,
+      error: "vocal_illisible",
+      reply:
+        "Désolé, je n'ai pas réussi à écouter votre vocal 🙏 Pouvez-vous le renvoyer, ou écrire en quelques mots : le client, l'adresse et les travaux ?",
     };
   }
 

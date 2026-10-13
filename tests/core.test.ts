@@ -92,3 +92,10 @@ test("price list import: Excel paste with headers, tabs and comma decimals", asy
     [["Remplacement mitigeur", "u", 180], ["Main d'œuvre", "h", 55.5]]
   );
 });
+
+test("title: client name always present", async () => {
+  const { inferTitle } = await import("../src/lib/draft-pipeline");
+  const job = { client_name: "Mme Lefebvre", description: "x" } as Parameters<typeof inferTitle>[0];
+  assert.equal(inferTitle(job, "Devis pour travaux de plomberie"), "Devis pour travaux de plomberie — Mme Lefebvre");
+  assert.equal(inferTitle(job, "Devis Mme Lefebvre — sèche-serviettes"), "Devis Mme Lefebvre — sèche-serviettes");
+});

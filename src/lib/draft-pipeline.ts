@@ -210,8 +210,12 @@ async function openaiLineItems(
   }
 }
 
-function inferTitle(job: Job, metaTitle?: string): string {
-  if (metaTitle) return metaTitle;
+export function inferTitle(job: Job, metaTitle?: string): string {
+  if (metaTitle) {
+    // Le nom du client doit toujours figurer dans le titre : l'artisan retrouve ses devis par client.
+    const client = job.client_name?.trim();
+    return client && !metaTitle.toLowerCase().includes(client.toLowerCase()) ? `${metaTitle} — ${client}` : metaTitle;
+  }
   const d = job.description.toLowerCase();
   let suffix = "";
   if (d.includes("chauffe") || d.includes("ballon") || d.includes("cumulus")) suffix = " — Remplacement chauffe-eau";

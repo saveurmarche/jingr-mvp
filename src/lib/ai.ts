@@ -43,7 +43,7 @@ export async function transcribeAudio(
       model: process.env.OPENAI_TRANSCRIBE_MODEL || "whisper-1",
       language: "fr",
       prompt:
-        "Artisan plombier chauffagiste qui décrit un chantier : client, adresse, chauffe-eau, ballon, cumulus, mitigeur, groupe de sécurité, chaudière, radiateur, PER, cuivre, raccord.",
+        "Artisan du bâtiment qui décrit un chantier : client, adresse, chauffe-eau, ballon, mitigeur, groupe de sécurité, chaudière, radiateur, PER, cuivre, tableau électrique, disjoncteur, différentiel, prise, spot, gaine, menuiserie, fenêtre.",
     });
     return res.text?.trim() || null;
   } catch (err) {
