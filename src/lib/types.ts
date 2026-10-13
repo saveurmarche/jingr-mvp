@@ -73,6 +73,9 @@ export type QuoteDraft = {
   total_ttc: number;
   status: "draft" | "validated" | "sent";
   validated_at?: string | null;
+  /** Acceptation en ligne par le client (« Bon pour accord ») */
+  accepted_at?: string | null;
+  accepted_by?: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -102,6 +105,14 @@ export type MessageInbox = {
   raw?: Record<string, unknown> | null;
   processed: boolean;
   job_id?: string | null;
+  created_at: string;
+};
+
+/** Lien envoyé au client final : lecture seule + acceptation. Distinct du jeton d'édition. */
+export type ClientLink = {
+  id: string;
+  quote_draft_id: string;
+  token: string;
   created_at: string;
 };
 
@@ -151,6 +162,7 @@ export type DbShape = {
   message_inbox: MessageInbox[];
   invoices: Invoice[];
   testimonials: Testimonial[];
+  client_links: ClientLink[];
 };
 
 /** Defaults for artisans loaded from older store.json without new fields */

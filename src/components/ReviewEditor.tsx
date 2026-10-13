@@ -41,6 +41,8 @@ export function ReviewEditor({
   clientName,
   initialInvoice,
   artisan,
+  initialClientUrl,
+  clientPhone,
 }: {
   token: string;
   draftId: string;
@@ -49,6 +51,8 @@ export function ReviewEditor({
   clientName: string;
   initialInvoice: Invoice | null;
   artisan: Artisan | null;
+  initialClientUrl: string | null;
+  clientPhone: string | null;
 }) {
   const [title, setTitle] = useState(initialDraft.title);
   const [intro, setIntro] = useState(initialDraft.intro || "");
@@ -236,6 +240,17 @@ export function ReviewEditor({
         </p>
 
         {status === "validated" ? (
+          <SendToClient
+            token={token}
+            clientName={clientName}
+            clientPhone={clientPhone}
+            initialUrl={initialClientUrl}
+            acceptedAt={initialDraft.accepted_at ?? null}
+            acceptedBy={initialDraft.accepted_by ?? null}
+          />
+        ) : null}
+
+        {status === "validated" ? (
           <div className="rounded-xl border border-[#c4b5fd] bg-[#faf8ff] p-4 space-y-3">
             <p className="font-semibold text-[#6B4EFF]">Facturation</p>
             {invoice ? (
@@ -349,6 +364,94 @@ function CompanySettings({ token, artisan }: { token: string; artisan: Artisan }
           </div>
         </div>
       ) : null}
+    </div>
+  );
+}
+
+function waNumber(phone: string): string {
+  let p = phone.replace(/[\s.\-()+]/g, "");
+  if (/^0\d{9}$/.test(p)) p = `33${p.slice(1)}`;
+  if (p.startsWith("00")) p = p.slice(2);
+  return p;
+}
+
+function SendToClient({
+  token,
+  clientName,
+  clientPhone,
+  initialUrl,
+  acceptedAt,
+  acceptedBy,
+}: {
+  token: string;
+  clientName: string;
+  clientPhone: string | null;
+  initialUrl: string | null;
+  acceptedAt: string | null;
+  acceptedBy: string | null;
+}) {
+  const [url, setUrl] = useState(initialUrl);
+  const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  async function createLink() {
+    setError(null);
+    const res = await fetch("/api/client-link", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token }),
+    });
+    const json = await res.json();
+    if (json.ok) setUrl(json.url);
+    else setError(json.error || "Erreur");
+  }
+
+  const message = url
+    ? `Bonjour ${clientName}, voici le devis pour vos travaux : ${url}\nVous pouvez le consulter et l'accepter en ligne. N'hésitez pas si vous avez des questions !`
+    : "";
+  const wa = url
+    ? `https://wa.me/${clientPhone ? waNumber(clientPhone) : ""}?text=${encodeURIComponent(message)}`
+    : null;
+
+  return (
+    <div className="rounded-xl border border-[#c4b5fd] bg-[#faf8ff] p-4 space-y-3">
+      <p className="font-semibold text-[#6B4EFF]">Envoyer au client</p>
+      {acceptedAt ? (
+        <p className="text-sm font-medium text-emerald-700">
+          ✅ Accepté par {acceptedBy || "le client"} le {new Date(acceptedAt).toLocaleDateString("fr-FR")}
+        </p>
+      ) : null}
+      {url ? (
+        <>
+          <p className="text-sm text-stone-600">
+            Votre client voit le devis (sans pouvoir le modifier) et peut l&apos;accepter en ligne. Vous êtes prévenu sur WhatsApp.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            {wa ? (
+              <a className="btn-primary" href={wa} target="_blank" rel="noopener noreferrer">
+                Envoyer par WhatsApp
+              </a>
+            ) : null}
+            <button
+              className="btn-secondary"
+              onClick={() => {
+                void navigator.clipboard.writeText(url);
+                setCopied(true);
+              }}
+            >
+              {copied ? "Lien copié" : "Copier le lien"}
+            </button>
+            <a className="btn-secondary" href={url} target="_blank" rel="noopener noreferrer">
+              Voir comme le client
+            </a>
+          </div>
+        </>
+      ) : (
+        <button className="btn-primary" onClick={() => void createLink()}>
+          Créer le lien pour {clientName}
+        </button>
+      )}
+      {error ? <p className="text-sm text-red-700">{error}</p> : null}
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import type {
   Artisan,
+  ClientLink,
   DbShape,
   Invoice,
   Job,
@@ -28,6 +29,7 @@ const emptyDb = (): DbShape => ({
   message_inbox: [],
   invoices: [],
   testimonials: [],
+  client_links: [],
 });
 
 function hasSupabaseConfig(): boolean {
@@ -521,6 +523,65 @@ export const db = {
     t.status = status;
     await writeStore(store);
     return t;
+  },
+
+  /** Lien client d'un devis validé (créé une fois, réutilisé ensuite). */
+  async getOrCreateClientLink(draftId: string): Promise<ClientLink> {
+    const store = await readStore();
+    const existing = store.client_links.find((l) => l.quote_draft_id === draftId);
+    if (existing) return existing;
+    const draft = store.quote_drafts.find((d) => d.id === draftId);
+    if (!draft) throw new Error("Devis introuvable");
+    if (draft.status === "draft") throw new Error("Validez le devis avant de l'envoyer au client");
+    const link: ClientLink = {
+      id: randomUUID(),
+      quote_draft_id: draftId,
+      token: randomUUID().replace(/-/g, "").slice(0, 24),
+      created_at: nowIso(),
+    };
+    store.client_links.push(link);
+    await writeStore(store);
+    return link;
+  },
+
+  async getClientLinkByDraft(draftId: string): Promise<ClientLink | null> {
+    const store = await readStore();
+    return store.client_links.find((l) => l.quote_draft_id === draftId) ?? null;
+  },
+
+  async getByClientToken(token: string): Promise<{
+    draft: QuoteDraft;
+    job: Job;
+    artisan?: Artisan;
+  } | null> {
+    const store = await readStore();
+    const link = store.client_links.find((l) => l.token === token);
+    if (!link) return null;
+    const draft = store.quote_drafts.find((d) => d.id === link.quote_draft_id);
+    const job = draft ? store.jobs.find((j) => j.id === draft.job_id) : undefined;
+    if (!draft || !job) return null;
+    return { draft, job, artisan: store.artisans.find((a) => a.id === job.artisan_id) };
+  },
+
+  /** Acceptation par le client. Idempotent : la première acceptation fait foi. */
+  async acceptQuote(token: string, name: string): Promise<{ draft: QuoteDraft; already: boolean } | null> {
+    const store = await readStore();
+    const link = store.client_links.find((l) => l.token === token);
+    const draft = link ? store.quote_drafts.find((d) => d.id === link.quote_draft_id) : undefined;
+    if (!draft) return null;
+    if (draft.accepted_at) return { draft, already: true };
+    draft.accepted_at = nowIso();
+    draft.accepted_by = name;
+    draft.updated_at = nowIso();
+    store.quote_events.push({
+      id: randomUUID(),
+      quote_draft_id: draft.id,
+      event_type: "accepted_by_client",
+      payload: { name },
+      created_at: nowIso(),
+    });
+    await writeStore(store);
+    return { draft, already: false };
   },
 
   async reset(): Promise<void> {
