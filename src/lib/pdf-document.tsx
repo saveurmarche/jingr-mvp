@@ -6,7 +6,7 @@ import {
   View,
   StyleSheet,
 } from "@react-pdf/renderer";
-import { artisanDefaults, type Artisan, type Job, type QuoteDraft } from "./types";
+import { artisanDefaults, type Artisan, type Invoice, type Job, type QuoteDraft } from "./types";
 
 const cream = "#F7F4EF";
 const violet = "#6B4EFF";
@@ -139,6 +139,18 @@ const styles = StyleSheet.create({
     fontSize: 11,
   },
   note: { marginTop: 16, fontSize: 8, color: muted, lineHeight: 1.4 },
+  legal: { marginTop: 14, fontSize: 7.5, color: muted, lineHeight: 1.45 },
+  signRow: { flexDirection: "row", justifyContent: "space-between", marginTop: 22 },
+  signBox: {
+    width: "48%",
+    height: 70,
+    borderWidth: 1,
+    borderColor: line,
+    borderRadius: 6,
+    padding: 8,
+    fontSize: 8,
+    color: muted,
+  },
   footer: {
     position: "absolute",
     bottom: 28,
@@ -169,27 +181,39 @@ export function QuotePdfDocument({
   draft,
   job,
   artisan,
+  invoice,
 }: {
   draft: QuoteDraft;
   job: Job;
   artisan?: Artisan;
+  /** Si fourni, le document est rendu comme une facture */
+  invoice?: Invoice;
 }) {
   const prefs = artisan ? artisanDefaults(artisan) : null;
   const company = artisan?.company_name || artisan?.name || "Artisan";
+  const isInvoice = Boolean(invoice);
+  const isDraft = !isInvoice && draft.status === "draft";
+  const items = invoice?.line_items ?? draft.line_items;
+  const sums = invoice ?? draft;
+  const franchise = prefs?.tva_franchise ?? false;
 
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        <View style={styles.banner}>
-          <Text style={styles.bannerText}>
-            BROUILLON — À VALIDER AVANT ENVOI CLIENT
-          </Text>
-        </View>
+        {isDraft ? (
+          <View style={styles.banner}>
+            <Text style={styles.bannerText}>
+              BROUILLON — À VALIDER AVANT ENVOI CLIENT
+            </Text>
+          </View>
+        ) : null}
 
         <View style={styles.header}>
           <View style={styles.brandBlock}>
-            <Text style={styles.brand}>jingr</Text>
-            <Text style={styles.brandSub}>Devis chantier · validation artisan</Text>
+            <Text style={styles.brand}>{isInvoice ? "FACTURE" : "DEVIS"}</Text>
+            <Text style={styles.brandSub}>
+              {isInvoice ? `N° ${invoice!.number}` : `Réf. ${draft.id.slice(0, 8).toUpperCase()}`}
+            </Text>
           </View>
           <View style={styles.companyBlock}>
             <Text style={styles.companyName}>{company}</Text>
@@ -202,13 +226,15 @@ export function QuotePdfDocument({
             {prefs?.siret ? (
               <Text style={styles.companyMeta}>SIRET {prefs.siret}</Text>
             ) : null}
-            {prefs?.city ? (
+            {prefs?.address ? (
+              <Text style={styles.companyMeta}>{prefs.address}</Text>
+            ) : prefs?.city ? (
               <Text style={styles.companyMeta}>{prefs.city}</Text>
             ) : null}
           </View>
         </View>
 
-        <Text style={styles.title}>{draft.title}</Text>
+        <Text style={styles.title}>{invoice?.title ?? draft.title}</Text>
 
         <View style={styles.metaRow}>
           <View style={styles.clientBox}>
@@ -217,15 +243,25 @@ export function QuotePdfDocument({
             {job.client_address ? <Text>{job.client_address}</Text> : null}
             {job.client_phone ? <Text>Tél. {job.client_phone}</Text> : null}
           </View>
-          <View style={styles.devisMeta}>
-            <Text style={styles.h2}>Devis</Text>
-            <Text>Date : {formatDate(draft.created_at)}</Text>
-            <Text>Statut : {draft.status === "validated" ? "Validé" : "Brouillon"}</Text>
-            <Text>Réf. : {draft.id.slice(0, 8).toUpperCase()}</Text>
-          </View>
+          {invoice ? (
+            <View style={styles.devisMeta}>
+              <Text style={styles.h2}>Facture</Text>
+              <Text>N° : {invoice.number}</Text>
+              <Text>Date d&apos;émission : {formatDate(invoice.issued_at)}</Text>
+              <Text>Échéance : {formatDate(invoice.due_at)}</Text>
+              <Text>Devis réf. : {draft.id.slice(0, 8).toUpperCase()}</Text>
+            </View>
+          ) : (
+            <View style={styles.devisMeta}>
+              <Text style={styles.h2}>Devis</Text>
+              <Text>Date : {formatDate(draft.created_at)}</Text>
+              <Text>Validité : 30 jours</Text>
+              <Text>Réf. : {draft.id.slice(0, 8).toUpperCase()}</Text>
+            </View>
+          )}
         </View>
 
-        {draft.intro ? (
+        {!isInvoice && draft.intro ? (
           <View style={styles.section}>
             <Text style={styles.intro}>{draft.intro}</Text>
           </View>
@@ -239,11 +275,11 @@ export function QuotePdfDocument({
             <Text style={styles.colPrice}>P.U. HT</Text>
             <Text style={styles.colTotal}>Total HT</Text>
           </View>
-          {draft.line_items.map((li) => (
+          {items.map((li) => (
             <View key={li.id} style={styles.row}>
               <Text style={styles.colLabel}>
                 {li.label}
-                {li.tva_rate ? ` (TVA ${li.tva_rate} %)` : ""}
+                {li.tva_rate && !franchise ? ` (TVA ${li.tva_rate} %)` : ""}
               </Text>
               <Text style={styles.colQty}>{li.quantity}</Text>
               <Text style={styles.colUnit}>{li.unit}</Text>
@@ -258,23 +294,53 @@ export function QuotePdfDocument({
         <View style={styles.totalsBox}>
           <View style={styles.totalLine}>
             <Text style={styles.totalLabel}>Total HT</Text>
-            <Text style={styles.totalValue}>{eur(draft.total_ht)}</Text>
+            <Text style={styles.totalValue}>{eur(sums.total_ht)}</Text>
           </View>
+          {franchise ? null : (
+            <View style={styles.totalLine}>
+              <Text style={styles.totalLabel}>TVA</Text>
+              <Text style={styles.totalValue}>{eur(sums.total_tva)}</Text>
+            </View>
+          )}
           <View style={styles.totalLine}>
-            <Text style={styles.totalLabel}>TVA</Text>
-            <Text style={styles.totalValue}>{eur(draft.total_tva)}</Text>
-          </View>
-          <View style={styles.totalLine}>
-            <Text style={styles.totalTtcLabel}>Total TTC</Text>
-            <Text style={styles.totalTtcValue}>{eur(draft.total_ttc)}</Text>
+            <Text style={styles.totalTtcLabel}>{franchise ? "Net à payer" : "Total TTC"}</Text>
+            <Text style={styles.totalTtcValue}>
+              {eur(franchise ? sums.total_ht : sums.total_ttc)}
+            </Text>
           </View>
         </View>
 
-        {draft.notes ? <Text style={styles.note}>{draft.notes}</Text> : null}
+        {isDraft && draft.notes ? <Text style={styles.note}>{draft.notes}</Text> : null}
+
+        {franchise ? (
+          <Text style={styles.legal}>TVA non applicable, art. 293 B du CGI.</Text>
+        ) : null}
+
+        {invoice ? (
+          <Text style={styles.legal}>
+            Paiement à réception, au plus tard le {formatDate(invoice.due_at)}. Pas
+            d&apos;escompte pour paiement anticipé. En cas de retard, pénalités au
+            taux de trois fois le taux d&apos;intérêt légal et indemnité forfaitaire
+            pour frais de recouvrement de 40 € (art. L441-10 du Code de commerce).
+            {invoice.status === "paid" && invoice.paid_at
+              ? `\nFacture acquittée le ${formatDate(invoice.paid_at)}.`
+              : ""}
+          </Text>
+        ) : (
+          <View style={styles.signRow}>
+            <View style={styles.signBox}>
+              <Text>L&apos;entreprise</Text>
+            </View>
+            <View style={styles.signBox}>
+              <Text>Le client — date, signature et mention « Bon pour accord »</Text>
+            </View>
+          </View>
+        )}
 
         <Text style={styles.footer}>
-          Document généré par jingr — brouillon non contractuel tant que
-          l&apos;artisan n&apos;a pas validé. Aucun envoi automatique au client.
+          {isDraft
+            ? "Brouillon non contractuel tant que l'artisan ne l'a pas validé. Aucun envoi automatique au client."
+            : `${company}${prefs?.siret ? ` · SIRET ${prefs.siret}` : ""} · Document réalisé avec jingr.ai`}
         </Text>
       </Page>
     </Document>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { QuoteDraft, QuoteLineItem } from "@/lib/types";
+import type { Artisan, Invoice, QuoteDraft, QuoteLineItem } from "@/lib/types";
 
 function eur(n: number) {
   return new Intl.NumberFormat("fr-FR", {
@@ -39,12 +39,16 @@ export function ReviewEditor({
   initialDraft,
   jobDescription,
   clientName,
+  initialInvoice,
+  artisan,
 }: {
   token: string;
   draftId: string;
   initialDraft: QuoteDraft;
   jobDescription: string;
   clientName: string;
+  initialInvoice: Invoice | null;
+  artisan: Artisan | null;
 }) {
   const [title, setTitle] = useState(initialDraft.title);
   const [intro, setIntro] = useState(initialDraft.intro || "");
@@ -53,6 +57,7 @@ export function ReviewEditor({
   const [status, setStatus] = useState(initialDraft.status);
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [invoice, setInvoice] = useState<Invoice | null>(initialInvoice);
 
   const sums = useMemo(() => recalc(items), [items]);
   const waUrl = useMemo(
@@ -108,8 +113,30 @@ export function ReviewEditor({
     }
   }
 
+  async function invoiceAction(action: "create" | "paid") {
+    setBusy(true);
+    setMsg(null);
+    try {
+      const res = await fetch("/api/invoices", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, action }),
+      });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error || "Erreur");
+      setInvoice(json.invoice);
+      setMsg(action === "create" ? `Facture ${json.invoice.number} créée.` : "Facture marquée payée.");
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : "Erreur");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <div className="space-y-4">
+      {artisan ? <CompanySettings token={token} artisan={artisan} /> : null}
+
       <div className="card space-y-3">
         <p className="text-sm text-stone-500">Chantier reçu</p>
         <p className="text-stone-800 whitespace-pre-wrap">{jobDescription}</p>
@@ -208,6 +235,40 @@ export function ReviewEditor({
           Ce n&apos;est pas un envoi du devis final au client.
         </p>
 
+        {status === "validated" ? (
+          <div className="rounded-xl border border-[#c4b5fd] bg-[#faf8ff] p-4 space-y-3">
+            <p className="font-semibold text-[#6B4EFF]">Facturation</p>
+            {invoice ? (
+              <>
+                <p className="text-sm text-stone-700">
+                  Facture <strong>{invoice.number}</strong> — {eur(invoice.total_ttc)} TTC —{" "}
+                  {invoice.status === "paid" ? "payée ✅" : `échéance le ${new Date(invoice.due_at).toLocaleDateString("fr-FR")}`}
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <a className="btn-primary" href={`/api/facture/${token}`}>
+                    Télécharger la facture
+                  </a>
+                  {invoice.status !== "paid" ? (
+                    <button className="btn-secondary" disabled={busy} onClick={() => invoiceAction("paid")}>
+                      Marquer payée
+                    </button>
+                  ) : null}
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-stone-600">
+                  Chantier terminé ? Transformez ce devis en facture en un clic
+                  (numérotation et mentions légales automatiques).
+                </p>
+                <button className="btn-primary" disabled={busy} onClick={() => invoiceAction("create")}>
+                  Transformer en facture
+                </button>
+              </>
+            )}
+          </div>
+        ) : null}
+
         {msg ? <p className="text-sm text-stone-700">{msg}</p> : null}
         {status === "validated" ? (
           <p className="text-sm font-medium text-emerald-700">
@@ -215,6 +276,79 @@ export function ReviewEditor({
           </p>
         ) : null}
       </div>
+    </div>
+  );
+}
+
+function CompanySettings({ token, artisan }: { token: string; artisan: Artisan }) {
+  const incomplete = !artisan.siret || !(artisan.address || artisan.city);
+  const [open, setOpen] = useState(incomplete);
+  const [form, setForm] = useState({
+    company_name: artisan.company_name || "",
+    siret: artisan.siret || "",
+    address: artisan.address || artisan.city || "",
+    marge_pct: artisan.marge_pct ?? 30,
+    default_tva: artisan.default_tva ?? 10,
+    tva_franchise: artisan.tva_franchise ?? false,
+  });
+  const [saved, setSaved] = useState<string | null>(null);
+
+  async function submit() {
+    setSaved(null);
+    const res = await fetch("/api/artisan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token, ...form }),
+    });
+    const json = await res.json();
+    setSaved(json.ok ? "Enregistré — appliqué à vos prochains devis et factures." : json.error || "Erreur");
+  }
+
+  return (
+    <div className="card space-y-3">
+      <button
+        type="button"
+        className="flex w-full items-center justify-between text-left"
+        onClick={() => setOpen((v) => !v)}
+      >
+        <span className="font-semibold text-stone-800">
+          Mon entreprise {incomplete ? <span className="text-sm text-amber-700">· à compléter pour facturer</span> : null}
+        </span>
+        <span className="text-stone-400">{open ? "−" : "+"}</span>
+      </button>
+      {open ? (
+        <div className="grid gap-3 sm:grid-cols-2">
+          <input className="input" placeholder="Nom de l'entreprise" value={form.company_name}
+            onChange={(e) => setForm({ ...form, company_name: e.target.value })} />
+          <input className="input" placeholder="SIRET" value={form.siret}
+            onChange={(e) => setForm({ ...form, siret: e.target.value })} />
+          <input className="input sm:col-span-2" placeholder="Adresse de l'entreprise" value={form.address}
+            onChange={(e) => setForm({ ...form, address: e.target.value })} />
+          <label className="text-sm text-stone-600">
+            Marge (%)
+            <input className="input mt-1" type="number" min={0} max={200} value={form.marge_pct}
+              onChange={(e) => setForm({ ...form, marge_pct: Number(e.target.value) })} />
+          </label>
+          <label className="text-sm text-stone-600">
+            TVA par défaut
+            <select className="input mt-1" value={form.default_tva}
+              onChange={(e) => setForm({ ...form, default_tva: Number(e.target.value) })}>
+              <option value={10}>10 % (rénovation)</option>
+              <option value={5.5}>5,5 % (rénovation énergétique)</option>
+              <option value={20}>20 % (neuf)</option>
+            </select>
+          </label>
+          <label className="flex items-center gap-2 text-sm text-stone-600 sm:col-span-2">
+            <input type="checkbox" checked={form.tva_franchise}
+              onChange={(e) => setForm({ ...form, tva_franchise: e.target.checked })} />
+            Micro-entreprise en franchise de TVA (art. 293 B du CGI)
+          </label>
+          <div className="sm:col-span-2 flex items-center gap-3">
+            <button type="button" className="btn-primary" onClick={submit}>Enregistrer</button>
+            {saved ? <span className="text-sm text-stone-600">{saved}</span> : null}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

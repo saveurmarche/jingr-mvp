@@ -10,6 +10,7 @@ export default async function ReviewPage({
   const { token } = await params;
   const data = await db.getByReviewToken(token);
   if (!data) notFound();
+  const invoice = await db.getInvoiceByDraft(data.draft.id);
 
   return (
     <div className="space-y-6">
@@ -32,6 +33,8 @@ export default async function ReviewPage({
         initialDraft={data.draft}
         jobDescription={data.job.description}
         clientName={data.job.client_name}
+        initialInvoice={invoice}
+        artisan={data.artisan ?? null}
       />
     </div>
   );

@@ -25,6 +25,13 @@ export default function GoPage() {
     fd.set("source", "web");
     fd.set("auto_draft", "true");
 
+    const audioInput = form.querySelector<HTMLInputElement>('input[name="audio"]');
+    if (!String(fd.get("description") || "").trim() && !audioInput?.files?.length) {
+      setResult({ ok: false, error: "Ajoutez un vocal ou une description du chantier" });
+      setLoading(false);
+      return;
+    }
+
     // Ensure photos field name is "photos"
     const photosInput = form.querySelector<HTMLInputElement>('input[name="photos"]');
     if (photosInput?.files && photosInput.files.length > 3) {
@@ -52,7 +59,7 @@ export default function GoPage() {
       <div>
         <h1 className="text-2xl font-bold text-stone-900">Envoyer un chantier</h1>
         <p className="mt-1 text-stone-600">
-          Mobile-first. Photos des notes, préférences, brouillon en retour.
+          Un vocal ou quelques lignes suffisent. Le devis revient en quelques minutes, à relire avant envoi.
         </p>
       </div>
 
@@ -153,12 +160,25 @@ export default function GoPage() {
             <input className="input" id="client_phone" name="client_phone" placeholder="06 …" />
           </div>
           <div>
-            <label className="label" htmlFor="description">Description</label>
+            <label className="label" htmlFor="audio">🎙️ Vocal (le plus rapide)</label>
+            <input
+              className="input"
+              id="audio"
+              name="audio"
+              type="file"
+              accept="audio/*"
+              capture="user"
+            />
+            <p className="mt-1 text-xs text-stone-400">
+              Dictez comme à un collègue : « Mme Dupont, 12 rue Victor Hugo à Lyon, cumulus 200 litres HS, à remplacer… »
+            </p>
+          </div>
+          <div>
+            <label className="label" htmlFor="description">Ou par écrit</label>
             <textarea
               className="input min-h-28"
               id="description"
               name="description"
-              required
               placeholder="Chauffe-eau électrique HS, à remplacer par un 200L…"
             />
           </div>

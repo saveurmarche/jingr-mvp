@@ -4,6 +4,7 @@ import path from "path";
 import type {
   Artisan,
   DbShape,
+  Invoice,
   Job,
   JobAsset,
   MessageInbox,
@@ -23,6 +24,7 @@ const emptyDb = (): DbShape => ({
   quote_events: [],
   review_tokens: [],
   message_inbox: [],
+  invoices: [],
 });
 
 function hasSupabaseConfig(): boolean {
@@ -113,6 +115,8 @@ export const db = {
     default_tva?: number;
     siret?: string;
     city?: string;
+    address?: string;
+    tva_franchise?: boolean;
   }): Promise<Artisan> {
     const store = await readStore();
     const phone = normalizePhone(input.phone);
@@ -130,6 +134,8 @@ export const db = {
         default_tva: input.default_tva ?? 10,
         siret: input.siret ?? null,
         city: input.city ?? null,
+        address: input.address ?? null,
+        tva_franchise: input.tva_franchise ?? false,
         created_at: nowIso(),
       };
       store.artisans.push(artisan);
@@ -173,6 +179,14 @@ export const db = {
     }
     if (input.city !== undefined) {
       artisan.city = input.city || null;
+      changed = true;
+    }
+    if (input.address !== undefined) {
+      artisan.address = input.address || null;
+      changed = true;
+    }
+    if (input.tva_franchise !== undefined) {
+      artisan.tva_franchise = input.tva_franchise;
       changed = true;
     }
     if (changed) await writeStore(store);
@@ -365,6 +379,82 @@ export const db = {
     store.message_inbox.push(msg);
     await writeStore(store);
     return msg;
+  },
+
+  /** Meta renvoie un webhook tant qu'il n'a pas reçu 200 : on déduplique par id de message. */
+  async inboxHasExternalId(externalId: string): Promise<boolean> {
+    const store = await readStore();
+    return store.message_inbox.some((m) => m.raw?.external_id === externalId);
+  },
+
+  async countDraftsForArtisan(artisanId: string): Promise<number> {
+    const store = await readStore();
+    const jobIds = new Set(
+      store.jobs.filter((j) => j.artisan_id === artisanId).map((j) => j.id)
+    );
+    return store.quote_drafts.filter((d) => jobIds.has(d.job_id)).length;
+  },
+
+  async getInvoiceByDraft(draftId: string): Promise<Invoice | null> {
+    const store = await readStore();
+    return store.invoices.find((i) => i.quote_draft_id === draftId) ?? null;
+  },
+
+  /**
+   * Crée la facture d'un devis validé. Idempotent : un devis = une facture.
+   * Numérotation chronologique continue par artisan et par année (obligation légale).
+   */
+  async createInvoiceFromDraft(draftId: string, paymentDays = 30): Promise<Invoice> {
+    const store = await readStore();
+    const existing = store.invoices.find((i) => i.quote_draft_id === draftId);
+    if (existing) return existing;
+
+    const draft = store.quote_drafts.find((d) => d.id === draftId);
+    if (!draft) throw new Error("Devis introuvable");
+    if (draft.status === "draft") throw new Error("Validez le devis avant de facturer");
+    const job = store.jobs.find((j) => j.id === draft.job_id);
+    if (!job) throw new Error("Chantier introuvable");
+
+    const now = new Date();
+    const year = now.getFullYear();
+    const prefix = `F-${year}-`;
+    const lastSeq = store.invoices
+      .filter((i) => i.artisan_id === job.artisan_id && i.number.startsWith(prefix))
+      .reduce((max, i) => Math.max(max, Number(i.number.slice(prefix.length)) || 0), 0);
+
+    const due = new Date(now);
+    due.setDate(due.getDate() + paymentDays);
+
+    const invoice: Invoice = {
+      id: randomUUID(),
+      artisan_id: job.artisan_id,
+      job_id: job.id,
+      quote_draft_id: draft.id,
+      number: `${prefix}${String(lastSeq + 1).padStart(4, "0")}`,
+      title: draft.title.replace(/^Devis/i, "Facture"),
+      line_items: draft.line_items,
+      total_ht: draft.total_ht,
+      total_tva: draft.total_tva,
+      total_ttc: draft.total_ttc,
+      issued_at: now.toISOString(),
+      due_at: due.toISOString(),
+      status: "issued",
+      paid_at: null,
+      created_at: now.toISOString(),
+    };
+    store.invoices.push(invoice);
+    await writeStore(store);
+    return invoice;
+  },
+
+  async markInvoicePaid(id: string): Promise<Invoice | null> {
+    const store = await readStore();
+    const inv = store.invoices.find((i) => i.id === id);
+    if (!inv) return null;
+    inv.status = "paid";
+    inv.paid_at = nowIso();
+    await writeStore(store);
+    return inv;
   },
 
   async reset(): Promise<void> {

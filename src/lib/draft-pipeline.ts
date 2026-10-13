@@ -69,7 +69,7 @@ function mockLineItems(job: Job, defaultTva: number): QuoteLineItem[] {
     });
   };
 
-  if (desc.includes("chauffe") || desc.includes("ballon") || desc.includes("eau chaude")) {
+  if (desc.includes("chauffe") || desc.includes("ballon") || desc.includes("cumulus") || desc.includes("eau chaude")) {
     push("Déplacement et diagnostic installation ECS", 1, "forfait", 65);
     push("Dépose ancien chauffe-eau / ballon", 1, "forfait", 85);
     push("Fourniture chauffe-eau électrique 200L (classe énergétique A)", 1, "u", 389);
@@ -195,7 +195,7 @@ function inferTitle(job: Job, metaTitle?: string): string {
   if (metaTitle) return metaTitle;
   const d = job.description.toLowerCase();
   let suffix = "";
-  if (d.includes("chauffe") || d.includes("ballon")) suffix = " — Remplacement chauffe-eau";
+  if (d.includes("chauffe") || d.includes("ballon") || d.includes("cumulus")) suffix = " — Remplacement chauffe-eau";
   else if (d.includes("fuite")) suffix = " — Réparation fuite";
   else if (d.includes("chaudière") || d.includes("chauffage")) suffix = " — Intervention chauffage";
   else if (d.includes("douche") || d.includes("salle de bain")) suffix = " — Salle de bain";
@@ -237,7 +237,9 @@ export async function generateDraftForJob(jobId: string): Promise<{
   let lineItems = ai?.items ?? mockLineItems(enrichedJob, prefs.default_tva);
   const meta = ai?.meta;
 
-  lineItems = applyDefaultTva(lineItems, prefs.default_tva);
+  lineItems = prefs.tva_franchise
+    ? lineItems.map((i) => ({ ...i, tva_rate: 0 }))
+    : applyDefaultTva(lineItems, prefs.default_tva);
   lineItems = applyMarge(lineItems, prefs.marge_pct);
 
   const sums = totals(lineItems);

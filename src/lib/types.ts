@@ -13,6 +13,12 @@ export type Artisan = {
   default_tva?: number;
   siret?: string | null;
   city?: string | null;
+  /** Adresse complète de l'entreprise (obligatoire sur facture) */
+  address?: string | null;
+  /** Micro-entrepreneur en franchise de TVA (art. 293 B du CGI) */
+  tva_franchise?: boolean;
+  /** Délai de paiement des factures, en jours (défaut 30) */
+  payment_days?: number;
   created_at: string;
 };
 
@@ -99,6 +105,27 @@ export type MessageInbox = {
   created_at: string;
 };
 
+export type InvoiceStatus = "issued" | "paid";
+
+export type Invoice = {
+  id: string;
+  artisan_id: string;
+  job_id: string;
+  quote_draft_id: string;
+  /** Numéro séquentiel sans trou, par artisan et par année : F-2026-0001 */
+  number: string;
+  title: string;
+  line_items: QuoteLineItem[];
+  total_ht: number;
+  total_tva: number;
+  total_ttc: number;
+  issued_at: string;
+  due_at: string;
+  status: InvoiceStatus;
+  paid_at?: string | null;
+  created_at: string;
+};
+
 export type DbShape = {
   artisans: Artisan[];
   jobs: Job[];
@@ -107,18 +134,22 @@ export type DbShape = {
   quote_events: QuoteEvent[];
   review_tokens: ReviewToken[];
   message_inbox: MessageInbox[];
+  invoices: Invoice[];
 };
 
 /** Defaults for artisans loaded from older store.json without new fields */
 export function artisanDefaults(a: Artisan): Required<
-  Pick<Artisan, "tutoiement" | "marge_pct" | "default_tva">
+  Pick<Artisan, "tutoiement" | "marge_pct" | "default_tva" | "tva_franchise" | "payment_days">
 > &
-  Pick<Artisan, "siret" | "city"> {
+  Pick<Artisan, "siret" | "city" | "address"> {
   return {
     tutoiement: a.tutoiement ?? false,
     marge_pct: a.marge_pct ?? 30,
     default_tva: a.default_tva ?? 10,
+    tva_franchise: a.tva_franchise ?? false,
+    payment_days: a.payment_days ?? 30,
     siret: a.siret ?? null,
     city: a.city ?? null,
+    address: a.address ?? null,
   };
 }

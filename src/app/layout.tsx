@@ -3,9 +3,11 @@ import Link from "next/link";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "jingr — devis chantier en 10 minutes",
+  metadataBase: new URL(process.env.APP_URL || "https://jingr.ai"),
+  title: "jingr — vos devis et factures d'artisan dictés sur WhatsApp",
   description:
-    "On n'envoie pas un logiciel. On envoie un chantier, on reçoit un brouillon de devis.",
+    "Plombiers, chauffagistes : dictez le chantier sur WhatsApp, recevez un devis chiffré à relire en quelques minutes. Facture en un clic. 10 devis offerts.",
+  openGraph: { locale: "fr_FR", type: "website", siteName: "jingr" },
 };
 
 export default function RootLayout({
@@ -20,21 +22,21 @@ export default function RootLayout({
               jingr
             </Link>
             <nav className="flex gap-3 text-sm">
-              <Link href="/go" className="text-stone-600 hover:text-[#6B4EFF]">
-                Chantier
+              <Link href="/#tarifs" className="text-stone-600 hover:text-[#6B4EFF]">
+                Tarif
               </Link>
               <Link href="/mes-devis" className="text-stone-600 hover:text-[#6B4EFF]">
                 Mes devis
               </Link>
-              <Link href="/ops" className="text-stone-400 hover:text-stone-600">
-                Ops
+              <Link href="/go" className="font-semibold text-[#6B4EFF]">
+                Essayer
               </Link>
             </nav>
           </div>
         </header>
         <main className="mx-auto max-w-3xl px-4 py-8">{children}</main>
         <footer className="mx-auto max-w-3xl px-4 pb-10 pt-4 text-center text-xs text-stone-400">
-          jingr — brouillon humain, jamais d&apos;envoi automatique au client.
+          jingr — devis et factures pour artisans. Rien n&apos;est envoyé à vos clients sans votre validation.
         </footer>
       </body>
     </html>
