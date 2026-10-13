@@ -9,7 +9,7 @@ export type CatalogLine = { label: string; qty: number; unit: string; pu: number
 
 export type CatalogEntry = {
   slug: string;
-  metier: "plombier" | "chauffagiste" | "électricien";
+  metier: "plombier" | "chauffagiste" | "électricien" | "menuisier" | "couvreur";
   title: string;
   short: string;
   tva: number;
@@ -216,6 +216,64 @@ export const catalog: CatalogEntry[] = [
     pitfalls: [
       "Ne pas vérifier la hauteur de plénum et l'isolant au-dessus du plafond.",
       "Oublier de préciser l'indice de protection (IP) en salle de bain.",
+    ],
+  },
+  {
+    slug: "pose-fenetre-pvc",
+    metier: "menuisier",
+    title: "Remplacement de fenêtre PVC double vitrage",
+    short: "Dépose de l'ancienne fenêtre, fenêtre PVC double vitrage sur mesure, pose en rénovation, finitions.",
+    tva: 5.5,
+    tvaNote:
+      "TVA 5,5 % si la fenêtre remplace un simple vitrage et respecte les seuils de performance énergétique (Uw et Sw) ; sinon 10 % en rénovation. Attestation du client à conserver.",
+    lines: [
+      { label: "Prise de cotes et déplacement", qty: 1, unit: "forfait", pu: 60 },
+      { label: "Fourniture fenêtre PVC 2 vantaux double vitrage sur mesure (env. 120 × 135 cm)", qty: 1, unit: "u", pu: 520 },
+      { label: "Dépose de l'ancienne fenêtre et évacuation", qty: 1, unit: "u", pu: 70 },
+      { label: "Pose en rénovation sur dormant existant, calfeutrement", qty: 1, unit: "u", pu: 180 },
+      { label: "Habillage intérieur et finitions (joint, couvre-joint)", qty: 1, unit: "forfait", pu: 60 },
+    ],
+    pitfalls: [
+      "Appliquer 5,5 % sans vérifier les performances Uw / Sw de la fenêtre ni le remplacement d'un simple vitrage.",
+      "Ne pas préciser si la reprise de peinture ou d'enduit autour de la fenêtre est comprise.",
+    ],
+  },
+  {
+    slug: "pose-porte-interieure",
+    metier: "menuisier",
+    title: "Pose de porte intérieure",
+    short: "Bloc-porte standard fourni et posé, dépose de l'ancien, quincaillerie et réglages.",
+    tva: 10,
+    tvaNote: "TVA 10 % en rénovation d'un logement de plus de 2 ans.",
+    lines: [
+      { label: "Dépose ancienne porte et huisserie", qty: 1, unit: "u", pu: 60 },
+      { label: "Fourniture bloc-porte prépeint 83 cm avec huisserie", qty: 1, unit: "u", pu: 190 },
+      { label: "Pose, calage et fixation", qty: 1, unit: "u", pu: 150 },
+      { label: "Quincaillerie (poignée, serrure à condamnation)", qty: 1, unit: "u", pu: 45 },
+      { label: "Pose des chambranles et réglages", qty: 1, unit: "u", pu: 40 },
+    ],
+    pitfalls: [
+      "Ne pas mesurer l'épaisseur de cloison avant de commander l'huisserie.",
+      "Oublier la peinture de finition si le bloc-porte est seulement prépeint.",
+    ],
+  },
+  {
+    slug: "remplacement-gouttiere-zinc",
+    metier: "couvreur",
+    title: "Remplacement de gouttière zinc",
+    short: "Dépose de l'ancienne gouttière, gouttière zinc demi-ronde, crochets, naissance et descente.",
+    tva: 10,
+    tvaNote: "TVA 10 % en rénovation d'un logement de plus de 2 ans.",
+    lines: [
+      { label: "Installation de l'échafaudage ou de la nacelle (selon accès)", qty: 1, unit: "forfait", pu: 250 },
+      { label: "Dépose et évacuation ancienne gouttière", qty: 12, unit: "ml", pu: 9 },
+      { label: "Fourniture et pose gouttière zinc demi-ronde 25 avec crochets", qty: 12, unit: "ml", pu: 45 },
+      { label: "Naissance, talon et soudures", qty: 1, unit: "forfait", pu: 90 },
+      { label: "Descente zinc diamètre 80 avec colliers", qty: 6, unit: "ml", pu: 40 },
+    ],
+    pitfalls: [
+      "Oublier l'accès (échafaudage, nacelle) : c'est souvent le poste le plus cher.",
+      "Ne pas vérifier l'état des voliges et de la planche de rive avant de chiffrer.",
     ],
   },
 ];

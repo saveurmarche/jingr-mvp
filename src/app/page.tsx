@@ -112,11 +112,31 @@ const faq: [string, string][] = [
   ["C'est engageant ?", `Non. Vos ${FREE} premiers devis sont offerts, sans carte bancaire. Ensuite ${PRICE} € HT/mois, résiliable en un message.`],
 ];
 
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "jingr",
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Web, WhatsApp",
+    description:
+      "Devis et factures pour artisans du bâtiment : un vocal WhatsApp depuis le chantier, un devis chiffré à relire, acceptation en ligne, facture en un clic.",
+    url: "https://jingr.ai",
+    offers: { "@type": "Offer", price: PRICE, priceCurrency: "EUR", description: "Par mois, hors TVA" },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faq.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })),
+  },
+];
+
 export default async function HomePage() {
   const testimonials = (await db.listTestimonials("approved")).slice(0, 6);
 
   return (
     <div className="wide space-y-24 pb-8">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       {/* HERO */}
       <section className="relative pt-10 text-center">
         <div className="orb left-[-6rem] top-40 h-72 w-72 bg-[#e6dcf5]" />
@@ -418,6 +438,9 @@ export default async function HomePage() {
               {e.title}
             </Link>
           ))}
+          <Link href="/logiciel-devis-artisan-lille" className="text-[#7a5bb5] hover:underline">
+            Logiciel de devis artisan à Lille
+          </Link>
           <Link href="/facture-electronique-artisan" className="text-[#7a5bb5] hover:underline">
             Facture électronique 2026-2027 : guide artisan
           </Link>
