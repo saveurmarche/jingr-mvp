@@ -124,3 +124,23 @@ test("pilot: edits counted per line (changed, added, removed)", async () => {
   assert.equal(m.validated_few_edits_pct, 50);
   assert.equal(m.per_artisan[0].avg_edits, 3);
 });
+
+test("store: atomic write and one daily backup", async () => {
+  const { mkdtempSync, readdirSync, existsSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+  const { execFileSync } = await import("node:child_process");
+  const dir = mkdtempSync(join(tmpdir(), "jingr-"));
+  const script = `
+    const m = await import(${JSON.stringify(new URL("../src/lib/db.ts", import.meta.url).href)});
+    const db = m.db ?? m.default.db;
+    await db.findOrCreateArtisan({ name: "A", phone: "0600000001" });
+    await db.findOrCreateArtisan({ name: "B", phone: "0600000002" });
+    await db.findOrCreateArtisan({ name: "C", phone: "0600000003" });`;
+  execFileSync(process.execPath, ["--import", "tsx", "--input-type=module", "-e", script], {
+    env: { ...process.env, DATA_DIR: dir },
+  });
+  assert.ok(existsSync(join(dir, "store.json")));
+  assert.equal(readdirSync(join(dir, "backups")).length, 1);
+  assert.ok(!readdirSync(dir).some((f) => f.endsWith(".tmp")));
+});

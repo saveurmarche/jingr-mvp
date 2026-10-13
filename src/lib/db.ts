@@ -51,9 +51,39 @@ async function readStore(): Promise<DbShape> {
   }
 }
 
+const BACKUP_DIR = path.join(DATA_DIR, "backups");
+const BACKUP_KEEP_DAYS = 30;
+
+/** Une copie par jour de la veille avant la première écriture du jour ; on garde 30 jours. */
+async function dailyBackup(): Promise<void> {
+  const day = new Date().toISOString().slice(0, 10);
+  const target = path.join(BACKUP_DIR, `store-${day}.json`);
+  try {
+    await fs.access(target);
+    return;
+  } catch {
+    // pas encore de copie aujourd'hui
+  }
+  try {
+    await fs.mkdir(BACKUP_DIR, { recursive: true });
+    await fs.copyFile(STORE_PATH, target);
+    const files = (await fs.readdir(BACKUP_DIR)).filter((f) => /^store-\d{4}-\d{2}-\d{2}\.json$/.test(f)).sort();
+    for (const old of files.slice(0, Math.max(0, files.length - BACKUP_KEEP_DAYS))) {
+      await fs.unlink(path.join(BACKUP_DIR, old));
+    }
+  } catch (err) {
+    // Pas de store encore (premier lancement) ou disque indisponible : on n'empêche jamais l'écriture.
+    if ((err as NodeJS.ErrnoException).code !== "ENOENT") console.error("Sauvegarde quotidienne échouée", err);
+  }
+}
+
 async function writeStore(db: DbShape): Promise<void> {
   await fs.mkdir(DATA_DIR, { recursive: true });
-  await fs.writeFile(STORE_PATH, JSON.stringify(db, null, 2), "utf8");
+  await dailyBackup();
+  // Écriture atomique : fichier temporaire puis renommage, pour ne jamais laisser un store.json tronqué.
+  const tmp = `${STORE_PATH}.${process.pid}.${Date.now()}.tmp`;
+  await fs.writeFile(tmp, JSON.stringify(db, null, 2), "utf8");
+  await fs.rename(tmp, STORE_PATH);
 }
 
 function nowIso() {
