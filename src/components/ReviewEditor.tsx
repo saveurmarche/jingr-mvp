@@ -43,6 +43,8 @@ export function ReviewEditor({
   initialInvoice,
   artisan,
   initialClientUrl,
+  clientLinkSentAt,
+  clientLinkViewedAt,
   clientPhone,
 }: {
   token: string;
@@ -53,6 +55,8 @@ export function ReviewEditor({
   initialInvoice: Invoice | null;
   artisan: Artisan | null;
   initialClientUrl: string | null;
+  clientLinkSentAt?: string | null;
+  clientLinkViewedAt?: string | null;
   clientPhone: string | null;
 }) {
   const [title, setTitle] = useState(initialDraft.title);
@@ -297,6 +301,8 @@ export function ReviewEditor({
             clientName={clientName}
             clientPhone={clientPhone}
             initialUrl={initialClientUrl}
+            sentAt={clientLinkSentAt ?? null}
+            viewedAt={clientLinkViewedAt ?? null}
             acceptedAt={initialDraft.accepted_at ?? null}
             acceptedBy={initialDraft.accepted_by ?? null}
           />
@@ -494,11 +500,15 @@ function SendToClient({
   initialUrl,
   acceptedAt,
   acceptedBy,
+  sentAt,
+  viewedAt,
 }: {
   token: string;
   clientName: string;
   clientPhone: string | null;
   initialUrl: string | null;
+  sentAt: string | null;
+  viewedAt: string | null;
   acceptedAt: string | null;
   acceptedBy: string | null;
 }) {
@@ -525,6 +535,20 @@ function SendToClient({
     ? `https://wa.me/${clientPhone ? waNumber(clientPhone) : ""}?text=${encodeURIComponent(message)}`
     : null;
 
+  // Relance : proposée à partir de 3 jours sans acceptation, message prêt à envoyer.
+  const daysSince = sentAt ? Math.floor((Date.now() - new Date(sentAt).getTime()) / 86_400_000) : 0;
+  const followUp =
+    url && !acceptedAt && daysSince >= 3
+      ? `Bonjour ${clientName}, je me permets de revenir vers vous au sujet du devis envoyé il y a quelques jours : ${url}\nAvez-vous des questions ? Je peux aussi ajuster une ligne si besoin. Bonne journée !`
+      : null;
+  const followUpLinks = followUp
+    ? {
+        wa: `https://wa.me/${clientPhone ? waNumber(clientPhone) : ""}?text=${encodeURIComponent(followUp)}`,
+        sms: clientPhone ? `sms:${clientPhone.replace(/\s/g, "")}?&body=${encodeURIComponent(followUp)}` : null,
+        mail: `mailto:?subject=${encodeURIComponent("Votre devis")}&body=${encodeURIComponent(followUp)}`,
+      }
+    : null;
+
   return (
     <div className="rounded-xl border border-[#c4b5fd] bg-[#faf8ff] p-4 space-y-3">
       <p className="font-semibold text-[#7b5ea7]">Envoyer au client</p>
@@ -532,6 +556,31 @@ function SendToClient({
         <p className="text-sm font-medium text-emerald-700">
           ✅ Accepté par {acceptedBy || "le client"} le {new Date(acceptedAt).toLocaleDateString("fr-FR")}
         </p>
+      ) : null}
+      {url && !acceptedAt && sentAt ? (
+        <p className="text-sm text-stone-600">
+          Lien créé le {new Date(sentAt).toLocaleDateString("fr-FR")}
+          {viewedAt
+            ? ` · ouvert par le client le ${new Date(viewedAt).toLocaleDateString("fr-FR")}`
+            : " · pas encore ouvert par le client"}
+          .
+        </p>
+      ) : null}
+      {followUpLinks ? (
+        <div className="space-y-2 rounded-xl border border-amber-300 bg-amber-50 p-3">
+          <p className="text-sm font-medium text-amber-900">
+            Pas encore accepté après {daysSince} jours : une petite relance polie, c&apos;est souvent ce qui manque.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <a className="btn-primary text-sm" href={followUpLinks.wa} target="_blank" rel="noopener noreferrer">
+              Relancer par WhatsApp
+            </a>
+            {followUpLinks.sms ? (
+              <a className="btn-secondary text-sm" href={followUpLinks.sms}>Par SMS</a>
+            ) : null}
+            <a className="btn-secondary text-sm" href={followUpLinks.mail}>Par e-mail</a>
+          </div>
+        </div>
       ) : null}
       {url ? (
         <>

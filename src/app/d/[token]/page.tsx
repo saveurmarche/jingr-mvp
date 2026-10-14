@@ -15,6 +15,7 @@ function eur(n: number) {
 export default async function ClientQuotePage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
   const data = await db.getByClientToken(token);
+  if (data && !data.draft.accepted_at) await db.markClientLinkViewed(token);
   if (!data) notFound();
   const { draft, job, artisan } = data;
   const prefs = artisan ? artisanDefaults(artisan) : null;

@@ -633,6 +633,15 @@ export const db = {
     return { draft, job, artisan: store.artisans.find((a) => a.id === job.artisan_id) };
   },
 
+  /** Note la première ouverture du lien par le client (pour la relance). */
+  async markClientLinkViewed(token: string): Promise<void> {
+    const store = await readStore();
+    const link = store.client_links.find((l) => l.token === token);
+    if (!link || link.viewed_at) return;
+    link.viewed_at = nowIso();
+    await writeStore(store);
+  },
+
   /** Acceptation par le client. Idempotent : la première acceptation fait foi. */
   async acceptQuote(token: string, name: string): Promise<{ draft: QuoteDraft; already: boolean } | null> {
     const store = await readStore();

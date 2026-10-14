@@ -37,6 +37,8 @@ export default async function ReviewPage({
         clientName={data.job.client_name}
         initialInvoice={invoice}
         initialClientUrl={clientLink ? `${appUrl()}/d/${clientLink.token}` : null}
+        clientLinkSentAt={clientLink?.created_at ?? null}
+        clientLinkViewedAt={clientLink?.viewed_at ?? null}
         clientPhone={data.job.client_phone ?? null}
         artisan={data.artisan ?? null}
       />

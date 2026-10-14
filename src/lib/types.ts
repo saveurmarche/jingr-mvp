@@ -136,6 +136,8 @@ export type ClientLink = {
   quote_draft_id: string;
   token: string;
   created_at: string;
+  /** Première consultation par le client */
+  viewed_at?: string | null;
 };
 
 /** Demande « Rejoindre la bêta » depuis le site */
