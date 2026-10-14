@@ -6,6 +6,7 @@ import {
   View,
   StyleSheet,
 } from "@react-pdf/renderer";
+import { quoteTerms } from "./quote-terms";
 import { artisanDefaults, type Artisan, type Invoice, type Job, type QuoteDraft } from "./types";
 
 const cream = "#F7F4EF";
@@ -196,6 +197,7 @@ export function QuotePdfDocument({
   const items = invoice?.line_items ?? draft.line_items;
   const sums = invoice ?? draft;
   const franchise = prefs?.tva_franchise ?? false;
+  const terms = quoteTerms(draft, artisan);
 
   return (
     <Document>
@@ -255,7 +257,7 @@ export function QuotePdfDocument({
             <View style={styles.devisMeta}>
               <Text style={styles.h2}>Devis</Text>
               <Text>Date : {formatDate(draft.created_at)}</Text>
-              <Text>Validité : 30 jours</Text>
+              <Text>Valable jusqu&apos;au : {formatDate(terms.validUntil.toISOString())}</Text>
               <Text>Réf. : {draft.id.slice(0, 8).toUpperCase()}</Text>
             </View>
           )}
@@ -311,6 +313,13 @@ export function QuotePdfDocument({
         </View>
 
         {isDraft && draft.notes ? <Text style={styles.note}>{draft.notes}</Text> : null}
+
+        {!isInvoice && terms.acomptePct > 0 ? (
+          <Text style={styles.legal}>
+            Acompte de {terms.acomptePct} % à la signature, soit {eur(terms.acompteAmount)}
+            {franchise ? "" : " TTC"}. Solde à la fin des travaux.
+          </Text>
+        ) : null}
 
         {franchise ? (
           <Text style={styles.legal}>TVA non applicable, art. 293 B du CGI.</Text>

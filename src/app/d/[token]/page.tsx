@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { artisanDefaults } from "@/lib/types";
 import { AcceptQuote } from "@/components/AcceptQuote";
+import { quoteTerms } from "@/lib/quote-terms";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { robots: { index: false, follow: false } };
@@ -21,6 +22,11 @@ export default async function ClientQuotePage({ params }: { params: Promise<{ to
   const prefs = artisan ? artisanDefaults(artisan) : null;
   const company = artisan?.company_name || artisan?.name || "Votre artisan";
   const franchise = prefs?.tva_franchise ?? false;
+  const terms = quoteTerms(draft, artisan);
+  const acompteText =
+    terms.acomptePct > 0
+      ? `Acompte de ${terms.acomptePct} % à la signature, soit ${eur(terms.acompteAmount)}${franchise ? "" : " TTC"}. Solde à la fin des travaux.`
+      : null;
 
   return (
     <div className="space-y-6">
@@ -35,7 +41,8 @@ export default async function ClientQuotePage({ params }: { params: Promise<{ to
         <p className="text-stone-600">
           Pour {job.client_name}
           {job.client_address ? `, ${job.client_address}` : ""} · émis le{" "}
-          {new Date(draft.validated_at || draft.created_at).toLocaleDateString("fr-FR")} · valable 30 jours
+          {new Date(draft.validated_at || draft.created_at).toLocaleDateString("fr-FR")} · valable jusqu&apos;au{" "}
+          {terms.validUntil.toLocaleDateString("fr-FR")}
         </p>
       </div>
 
@@ -75,11 +82,19 @@ export default async function ClientQuotePage({ params }: { params: Promise<{ to
         </div>
       </div>
 
+      {terms.expired && !draft.accepted_at ? (
+        <div className="card border-amber-200 bg-amber-50 text-sm text-amber-900">
+          Ce devis a dépassé sa date de validité. Vous pouvez encore l&apos;accepter, mais {company} devra
+          vous confirmer les prix avant les travaux.
+        </div>
+      ) : null}
+
       <AcceptQuote
         token={token}
         acceptedAt={draft.accepted_at ?? null}
         acceptedBy={draft.accepted_by ?? null}
         company={company}
+        acompteText={acompteText}
       />
 
       <p className="text-center text-sm">

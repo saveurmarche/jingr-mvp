@@ -386,6 +386,8 @@ function CompanySettings({
     marge_pct: artisan.marge_pct ?? 30,
     default_tva: artisan.default_tva ?? 10,
     tva_franchise: artisan.tva_franchise ?? false,
+    acompte_pct: artisan.acompte_pct ?? 0,
+    validity_days: artisan.validity_days ?? 30,
     billing_software: artisan.billing_software ?? "jingr",
   });
   const [priceText, setPriceText] = useState("");
@@ -446,6 +448,27 @@ function CompanySettings({
               <option value={10}>10 % (rénovation)</option>
               <option value={5.5}>5,5 % (rénovation énergétique)</option>
               <option value={20}>20 % (neuf)</option>
+            </select>
+          </label>
+          <label className="text-sm text-stone-600">
+            Acompte à la signature
+            <select className="input mt-1" value={form.acompte_pct}
+              onChange={(e) => setForm({ ...form, acompte_pct: Number(e.target.value) })}>
+              <option value={0}>Pas d&apos;acompte</option>
+              <option value={20}>20 %</option>
+              <option value={30}>30 %</option>
+              <option value={40}>40 %</option>
+              <option value={50}>50 %</option>
+            </select>
+          </label>
+          <label className="text-sm text-stone-600">
+            Devis valable
+            <select className="input mt-1" value={form.validity_days}
+              onChange={(e) => setForm({ ...form, validity_days: Number(e.target.value) })}>
+              <option value={15}>15 jours</option>
+              <option value={30}>30 jours</option>
+              <option value={60}>60 jours</option>
+              <option value={90}>3 mois</option>
             </select>
           </label>
           <label className="flex items-center gap-2 text-sm text-stone-600 sm:col-span-2">

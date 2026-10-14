@@ -159,6 +159,8 @@ export const db = {
     city?: string;
     address?: string;
     tva_franchise?: boolean;
+    acompte_pct?: number;
+    validity_days?: number;
     billing_software?: string | null;
   }): Promise<Artisan> {
     const store = await readStore();
@@ -230,6 +232,14 @@ export const db = {
     }
     if (input.tva_franchise !== undefined) {
       artisan.tva_franchise = input.tva_franchise;
+      changed = true;
+    }
+    if (input.acompte_pct !== undefined) {
+      artisan.acompte_pct = input.acompte_pct;
+      changed = true;
+    }
+    if (input.validity_days !== undefined) {
+      artisan.validity_days = input.validity_days;
       changed = true;
     }
     if (input.billing_software !== undefined) {

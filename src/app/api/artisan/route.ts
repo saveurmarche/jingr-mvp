@@ -14,6 +14,8 @@ const schema = z.object({
   default_tva: z.union([z.literal(10), z.literal(20), z.literal(5.5)]).optional(),
   tva_franchise: z.boolean().optional(),
   tutoiement: z.boolean().optional(),
+  acompte_pct: z.number().int().min(0).max(100).optional(),
+  validity_days: z.number().int().min(7).max(180).optional(),
   billing_software: z.string().max(60).nullable().optional(),
   /** Tarif collé : une ligne par article « désignation ; unité ; prix HT » */
   price_list_text: z.string().max(50_000).optional(),

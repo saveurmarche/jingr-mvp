@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { appUrl } from "@/lib/intake";
 import { sendText } from "@/lib/whatsapp";
 import { invoicesInJingr } from "@/lib/billing-software";
+import { quoteTerms } from "@/lib/quote-terms";
 
 const schema = z.object({
   name: z.string().trim().min(2).max(120),
@@ -25,10 +26,14 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ token: str
       const data = await db.getByClientToken(token);
       const review = data ? await db.createReviewToken({ job_id: data.job.id, quote_draft_id: data.draft.id }) : null;
       if (data?.artisan?.phone) {
+        const terms = quoteTerms(data.draft, data.artisan);
         await sendText(
           data.artisan.phone,
           [
             `🎉 ${name} a accepté votre devis « ${data.draft.title} » (${eur(data.draft.total_ttc)} TTC).`,
+            terms.acomptePct > 0
+              ? `Acompte prévu : ${eur(terms.acompteAmount)} (${terms.acomptePct} %), pensez à le demander avant de commander le matériel.`
+              : "",
             review
               ? invoicesInJingr(data.artisan.billing_software)
                 ? `Chantier terminé ? Facturez en un clic : ${appUrl()}/review/${review.token}`

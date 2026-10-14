@@ -7,11 +7,13 @@ export function AcceptQuote({
   acceptedAt,
   acceptedBy,
   company,
+  acompteText,
 }: {
   token: string;
   acceptedAt: string | null;
   acceptedBy: string | null;
   company: string;
+  acompteText?: string | null;
 }) {
   const [name, setName] = useState("");
   const [consent, setConsent] = useState(false);
@@ -44,7 +46,8 @@ export function AcceptQuote({
     return (
       <div className="card border-emerald-200 bg-emerald-50 text-emerald-800">
         ✅ Devis accepté{done.by ? ` par ${done.by}` : ""} le {new Date(done.at).toLocaleDateString("fr-FR")}.
-        {" "}{company} a été prévenu et vous recontacte pour fixer la date des travaux.
+        {" "}{company} a été prévenu et vous recontacte pour fixer la date des travaux
+        {acompteText ? " et le règlement de l'acompte" : ""}.
       </div>
     );
   }
@@ -62,6 +65,7 @@ export function AcceptQuote({
         <input type="checkbox" className="mt-1" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
         Bon pour accord : j&apos;accepte ce devis et ses conditions.
       </label>
+      {acompteText ? <p className="text-sm text-stone-600">{acompteText}</p> : null}
       <button className="btn-primary w-full" disabled={busy || !consent || name.trim().length < 2} onClick={accept}>
         {busy ? "…" : "Accepter le devis"}
       </button>

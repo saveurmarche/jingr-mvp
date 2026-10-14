@@ -19,6 +19,10 @@ export type Artisan = {
   tva_franchise?: boolean;
   /** Délai de paiement des factures, en jours (défaut 30) */
   payment_days?: number;
+  /** Acompte demandé à la signature, en % du total TTC (0 = pas d'acompte) */
+  acompte_pct?: number;
+  /** Durée de validité des devis, en jours (défaut 30) */
+  validity_days?: number;
   /** Logiciel de facturation déjà utilisé (null / "jingr" = facture dans jingr) */
   billing_software?: string | null;
   /** Catalogue de prix appris des devis validés (prix de vente HT de l'artisan) */
@@ -207,7 +211,7 @@ export type DbShape = {
 
 /** Defaults for artisans loaded from older store.json without new fields */
 export function artisanDefaults(a: Artisan): Required<
-  Pick<Artisan, "tutoiement" | "marge_pct" | "default_tva" | "tva_franchise" | "payment_days">
+  Pick<Artisan, "tutoiement" | "marge_pct" | "default_tva" | "tva_franchise" | "payment_days" | "acompte_pct" | "validity_days">
 > &
   Pick<Artisan, "siret" | "city" | "address"> {
   return {
@@ -216,6 +220,8 @@ export function artisanDefaults(a: Artisan): Required<
     default_tva: a.default_tva ?? 10,
     tva_franchise: a.tva_franchise ?? false,
     payment_days: a.payment_days ?? 30,
+    acompte_pct: a.acompte_pct ?? 0,
+    validity_days: a.validity_days ?? 30,
     siret: a.siret ?? null,
     city: a.city ?? null,
     address: a.address ?? null,

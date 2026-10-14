@@ -144,3 +144,16 @@ test("store: atomic write and one daily backup", async () => {
   assert.equal(readdirSync(join(dir, "backups")).length, 1);
   assert.ok(!readdirSync(dir).some((f) => f.endsWith(".tmp")));
 });
+
+test("quote terms: validity date, expiry and deposit on TTC (HT in franchise)", async () => {
+  const { quoteTerms } = await import("../src/lib/quote-terms");
+  const draft = { created_at: "2026-10-01T10:00:00Z", validated_at: "2026-10-02T10:00:00Z", total_ht: 1000, total_ttc: 1100 };
+  const artisan = { id: "a", name: "A", phone: "", trade: "", created_at: "", acompte_pct: 30 };
+  const t = quoteTerms(draft, artisan, new Date("2026-10-20T00:00:00Z"));
+  assert.equal(t.validUntil.toISOString(), "2026-11-01T10:00:00.000Z");
+  assert.equal(t.expired, false);
+  assert.equal(t.acompteAmount, 330);
+  assert.equal(quoteTerms(draft, { ...artisan, tva_franchise: true }).acompteAmount, 300);
+  assert.equal(quoteTerms(draft, { ...artisan, validity_days: 15 }, new Date("2026-10-20T00:00:00Z")).expired, true);
+  assert.equal(quoteTerms(draft, null).acomptePct, 0);
+});
