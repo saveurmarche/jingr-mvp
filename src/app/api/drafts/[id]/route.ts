@@ -17,6 +17,7 @@ const lineSchema = z.object({
 });
 
 const patchSchema = z.object({
+  token: z.string().min(8),
   title: z.string().optional(),
   intro: z.string().optional(),
   notes: z.string().optional(),
@@ -24,12 +25,19 @@ const patchSchema = z.object({
   action: z.enum(["save", "validate"]).default("save"),
 });
 
+/** Le brouillon n'est accessible qu'avec le jeton de revue de l'artisan qui lui correspond. */
+async function draftForToken(id: string, token: string | null | undefined) {
+  if (!token) return null;
+  const data = await db.getByReviewToken(token);
+  return data && data.draft.id === id ? data.draft : null;
+}
+
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   ctx: { params: Promise<{ id: string }> }
 ) {
   const { id } = await ctx.params;
-  const draft = await db.getDraft(id);
+  const draft = await draftForToken(id, req.nextUrl.searchParams.get("token"));
   if (!draft) {
     return NextResponse.json({ ok: false, error: "Introuvable" }, { status: 404 });
   }
@@ -42,12 +50,12 @@ export async function POST(
 ) {
   try {
     const { id } = await ctx.params;
-    const draft = await db.getDraft(id);
+    const body = patchSchema.parse(await req.json());
+    const draft = await draftForToken(id, body.token);
     if (!draft) {
       return NextResponse.json({ ok: false, error: "Introuvable" }, { status: 404 });
     }
 
-    const body = patchSchema.parse(await req.json());
     const line_items = (body.line_items ?? draft.line_items) as QuoteLineItem[];
     const sums = recalcTotals(line_items);
 
