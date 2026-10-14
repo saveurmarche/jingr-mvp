@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { SOFTWARE_OPTIONS } from "@/lib/billing-software";
 
@@ -56,7 +57,7 @@ export function BetaForm() {
       <p className="text-xs text-[#6f6a7d]">
         En envoyant, vous acceptez d&apos;être recontacté au sujet de la bêta. Données traitées conformément
         à notre{" "}
-        <a href="/confidentialite" className="text-[#7a5bb5] underline">politique de confidentialité</a>.
+        <Link href="/confidentialite" className="text-[#7a5bb5] underline">politique de confidentialité</Link>.
       </p>
       <button className="btn-primary w-full" disabled={busy}>
         {busy ? "Envoi…" : "Rejoindre la bêta →"}

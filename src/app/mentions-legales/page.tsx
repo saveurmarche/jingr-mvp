@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { company } from "@/lib/company";
 
 export const metadata: Metadata = {
@@ -27,7 +28,7 @@ export default function MentionsLegalesPage() {
       <section className="space-y-1">
         <h2 className="text-lg font-bold text-stone-900">Données personnelles</h2>
         <p>
-          Voir la <a className="text-[#7b5ea7] underline" href="/confidentialite">politique de confidentialité</a>.
+          Voir la <Link className="text-[#7b5ea7] underline" href="/confidentialite">politique de confidentialité</Link>.
         </p>
       </section>
     </article>
