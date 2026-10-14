@@ -60,6 +60,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               <Link href="/#beta" className="hover:text-[#7a5bb5]">Bêta</Link>
               <Link href="/go" className="hover:text-[#7a5bb5]">/go</Link>
               <Link href="/mes-devis" className="hover:text-[#7a5bb5]">Mes devis</Link>
+              <Link href="/devis-whatsapp-artisan" className="hover:text-[#7a5bb5]">Devis WhatsApp</Link>
+              <Link href="/devis-artisan-sans-logiciel" className="hover:text-[#7a5bb5]">Sans logiciel</Link>
+              <Link href="/devis-plombier-chauffagiste" className="hover:text-[#7a5bb5]">Plombiers</Link>
+              <Link href="/devis-electricien" className="hover:text-[#7a5bb5]">Électriciens</Link>
+              <Link href="/logiciel-devis-artisan-lille" className="hover:text-[#7a5bb5]">Lille</Link>
               <Link href="/facture-electronique-artisan" className="hover:text-[#7a5bb5]">Facture électronique</Link>
               <span>© {new Date().getFullYear()} jingr.ai</span>
               <Link href="/mentions-legales" className="hover:text-[#7a5bb5]">Mentions légales</Link>
