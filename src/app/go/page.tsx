@@ -76,6 +76,13 @@ export default function GoPage() {
             <label className="label" htmlFor="artisan_phone">Téléphone</label>
             <input className="input" id="artisan_phone" name="artisan_phone" required placeholder="06 12 34 56 78" />
           </div>
+        </fieldset>
+
+        <details className="rounded-xl border border-[#ebe4da] px-3 py-2">
+          <summary className="cursor-pointer text-sm font-semibold text-[#7b5ea7]">
+            Options : entreprise, marge, TVA (facultatif)
+          </summary>
+          <div className="mt-3 space-y-3">
           <div>
             <label className="label" htmlFor="company_name">Entreprise (optionnel)</label>
             <input className="input" id="company_name" name="company_name" placeholder="Martin Plomberie" />
@@ -87,15 +94,9 @@ export default function GoPage() {
             </div>
             <div>
               <label className="label" htmlFor="city">Ville (optionnel)</label>
-              <input className="input" id="city" name="city" placeholder="Lyon" />
+              <input className="input" id="city" name="city" placeholder="Lille" />
             </div>
           </div>
-        </fieldset>
-
-        <fieldset className="space-y-3">
-          <legend className="mb-1 text-sm font-semibold text-[#7b5ea7]">
-            Préférences devis
-          </legend>
           <div className="flex items-center justify-between gap-3 rounded-xl border border-[#ebe4da] bg-[#fffcf8] px-3 py-3">
             <div>
               <p className="text-sm font-semibold text-stone-800">Tutoiement client</p>
@@ -141,7 +142,8 @@ export default function GoPage() {
               </select>
             </div>
           </div>
-        </fieldset>
+          </div>
+        </details>
 
         <fieldset className="space-y-3">
           <legend className="mb-1 text-sm font-semibold text-[#7b5ea7]">
@@ -153,7 +155,7 @@ export default function GoPage() {
           </div>
           <div>
             <label className="label" htmlFor="client_address">Adresse</label>
-            <input className="input" id="client_address" name="client_address" placeholder="12 rue Victor Hugo, 69003 Lyon" />
+            <input className="input" id="client_address" name="client_address" placeholder="12 rue Nationale, 59000 Lille" />
           </div>
           <div>
             <label className="label" htmlFor="client_phone">Tél. client (optionnel)</label>
@@ -170,7 +172,7 @@ export default function GoPage() {
               capture="user"
             />
             <p className="mt-1 text-xs text-stone-400">
-              Dictez comme à un collègue : « Mme Dupont, 12 rue Victor Hugo à Lyon, cumulus 200 litres HS, à remplacer… »
+              Dictez comme à un collègue : « Mme Dupont, 12 rue Nationale à Lille, cumulus 200 litres HS, à remplacer… »
             </p>
           </div>
           <div>

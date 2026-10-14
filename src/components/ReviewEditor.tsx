@@ -173,20 +173,28 @@ export function ReviewEditor({
               avant de valider. Une fois validés, ils sont retenus pour vos prochains devis.
             </p>
           ) : null}
+          <div className="grid grid-cols-3 gap-2 px-3 text-xs text-stone-500 sm:hidden">
+            <span>Quantité</span>
+            <span>Unité</span>
+            <span>Prix HT</span>
+          </div>
           {items.map((li) => (
             <div
               key={li.id}
-              className={`grid gap-2 rounded-xl border p-3 sm:grid-cols-12 ${
+              className={`grid grid-cols-3 gap-2 rounded-xl border p-3 sm:grid-cols-12 ${
                 li.price_source === "estimate" ? "border-amber-300 bg-amber-50" : "border-[#ebe4da]"
               }`}
             >
               <input
-                className="input sm:col-span-5"
+                className="input col-span-3 sm:col-span-5"
+                aria-label="Désignation"
                 value={li.label}
                 onChange={(e) => updateItem(li.id, { label: e.target.value })}
               />
               <input
                 className="input sm:col-span-2"
+                aria-label="Quantité"
+                title="Quantité"
                 type="number"
                 step="0.5"
                 value={li.quantity}
@@ -194,11 +202,14 @@ export function ReviewEditor({
               />
               <input
                 className="input sm:col-span-2"
+                aria-label="Unité"
+                title="Unité"
                 value={li.unit}
                 onChange={(e) => updateItem(li.id, { unit: e.target.value })}
               />
               <input
                 className="input sm:col-span-2"
+                aria-label="Prix unitaire HT"
                 type="number"
                 step="0.01"
                 value={li.unit_price_ht}
@@ -209,13 +220,14 @@ export function ReviewEditor({
               />
               <button
                 type="button"
-                className="text-sm text-red-600 sm:col-span-1"
+                className="col-span-3 text-right text-sm text-red-600 sm:col-span-1 sm:text-center"
+                aria-label="Supprimer la ligne"
                 onClick={() => removeLine(li.id)}
               >
                 ✕
               </button>
               {li.price_source === "estimate" ? (
-                <div className="flex items-center gap-3 text-xs text-amber-900 sm:col-span-12">
+                <div className="col-span-3 flex items-center gap-3 text-xs text-amber-900 sm:col-span-12">
                   Prix estimé, pas encore votre tarif.
                   <button
                     type="button"
@@ -359,7 +371,8 @@ function CompanySettings({
   onBillingChange: (v: string | null) => void;
 }) {
   const incomplete = !artisan.siret || !(artisan.address || artisan.city);
-  const [open, setOpen] = useState(incomplete);
+  // Fermé par défaut : sur téléphone, le devis passe avant les réglages.
+  const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
     company_name: artisan.company_name || "",
     siret: artisan.siret || "",
