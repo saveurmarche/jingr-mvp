@@ -22,6 +22,18 @@ export async function generateMetadata({
   };
 }
 
+/** Page métier à mettre en avant depuis chaque modèle. */
+const TRADE_LANDING: Record<string, [string, string]> = {
+  plombier: ["/devis-plombier-chauffagiste", "Devis plombier chauffagiste"],
+  chauffagiste: ["/devis-plombier-chauffagiste", "Devis plombier chauffagiste"],
+  "électricien": ["/devis-electricien", "Devis électricien"],
+  menuisier: ["/devis-menuisier", "Devis menuisier"],
+  couvreur: ["/devis-couvreur", "Devis couvreur"],
+  peintre: ["/devis-peintre-plaquiste-carreleur", "Devis peintre, plaquiste, carreleur"],
+  plaquiste: ["/devis-peintre-plaquiste-carreleur", "Devis peintre, plaquiste, carreleur"],
+  carreleur: ["/devis-peintre-plaquiste-carreleur", "Devis peintre, plaquiste, carreleur"],
+};
+
 function eur(n: number) {
   return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(n);
 }
@@ -35,9 +47,25 @@ export default async function ModeleDevisPage({
   if (!e) notFound();
   const t = entryTotals(e);
   const others = catalog.filter((o) => o.slug !== e.slug);
+  const trade = TRADE_LANDING[e.metier];
+  const base = (process.env.APP_URL || "https://jingr.ai").replace(/\/$/, "");
+  const breadcrumb = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "jingr", item: `${base}/` },
+      { "@type": "ListItem", position: 2, name: "Modèles de devis", item: `${base}/modele-devis` },
+      { "@type": "ListItem", position: 3, name: e.title, item: `${base}/modele-devis/${e.slug}` },
+    ],
+  };
 
   return (
     <article className="space-y-8">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }} />
+      <nav className="text-sm text-stone-500">
+        <Link href="/modele-devis" className="hover:underline">Modèles de devis</Link> ›{" "}
+        {trade ? <Link href={trade[0]} className="hover:underline">{trade[1]}</Link> : e.metier}
+      </nav>
       <header className="space-y-3">
         <p className="text-sm font-semibold uppercase tracking-wide text-[#7b5ea7]">
           Modèle de devis {e.metier}

@@ -86,6 +86,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               <Link href="/modele-devis" className="hover:text-[#7a5bb5]">Modèles de devis</Link>
               <Link href="/devis-plombier-chauffagiste" className="hover:text-[#7a5bb5]">Plombiers</Link>
               <Link href="/devis-electricien" className="hover:text-[#7a5bb5]">Électriciens</Link>
+              <Link href="/devis-menuisier" className="hover:text-[#7a5bb5]">Menuisiers</Link>
+              <Link href="/devis-couvreur" className="hover:text-[#7a5bb5]">Couvreurs</Link>
+              <Link href="/devis-peintre-plaquiste-carreleur" className="hover:text-[#7a5bb5]">Peintres, plaquistes, carreleurs</Link>
               <Link href="/logiciel-devis-artisan-lille" className="hover:text-[#7a5bb5]">Lille</Link>
               <Link href="/facture-electronique-artisan" className="hover:text-[#7a5bb5]">Facture électronique</Link>
               <span>© {new Date().getFullYear()} jingr.ai</span>

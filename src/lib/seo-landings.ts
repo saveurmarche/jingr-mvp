@@ -210,6 +210,94 @@ export const landings: Landing[] = [
     ],
     templates: ["remplacement-chauffe-eau", "remplacement-tableau-electrique", "pose-fenetre-pvc"],
   },
+  {
+    slug: "devis-couvreur",
+    title: "Logiciel de devis couvreur : dictez le chantier, recevez le devis chiffré",
+    description:
+      "Couvreurs et zingueurs : gouttières, tuiles, faîtage… Dictez le chantier depuis le téléphone, recevez un devis chiffré avec vos prix, accès et sécurité compris. Modèles de devis toiture gratuits.",
+    eyebrow: "Couvreurs · zingueurs",
+    h1: "Devis de toiture et de zinguerie, dictés depuis le chantier",
+    intro:
+      "Sur un toit, on n'a pas le temps de remplir un logiciel. Vous décrivez ce que vous avez vu en descendant de l'échelle, jingr prépare le devis avec vos prix, et vous le relisez au calme.",
+    sections: [
+      {
+        h2: "Les postes qu'on oublie le plus souvent",
+        body: [
+          "L'accès et la sécurité : échafaudage, nacelle, échelle de toit. C'est souvent le poste le plus lourd du devis.",
+          "Ce qui n'est pas compris : liteaux, voliges ou charpente abîmés, à chiffrer à part après dépose.",
+          "Les quantités au mètre linéaire pour la zinguerie, et au nombre pour les tuiles, avec le modèle à vérifier.",
+        ],
+      },
+      {
+        h2: "Vos prix, pas des prix moyens",
+        body: [
+          "Vous collez votre tarif une fois ; jingr le reprend tel quel. Un poste inconnu est marqué « à confirmer », jamais inventé.",
+          "La TVA à 10 % en rénovation d'un logement de plus de 2 ans est proposée, et vous gardez la main.",
+        ],
+      },
+    ],
+    faq: [
+      ["Je peux envoyer des photos du toit ?", "Oui : deux ou trois photos avec la description aident à préparer les lignes. Le devis reste à relire et à valider par vous."],
+      ["Et les travaux d'isolation de toiture ?", "jingr rédige et chiffre avec vos prix. Les taux de TVA réduits et les aides liées à la rénovation énergétique dépendent de conditions à vérifier de votre côté (RGE, attestation du client)."],
+    ],
+    templates: ["remplacement-gouttiere-zinc", "reparation-toiture-tuiles"],
+  },
+  {
+    slug: "devis-menuisier",
+    title: "Logiciel de devis menuisier : fenêtres, portes, parquet, dictés depuis le chantier",
+    description:
+      "Menuisiers : pose de fenêtres, portes intérieures, parquet… Dictez le chantier depuis le téléphone, recevez un devis chiffré avec vos prix et les cotes à vérifier. Modèles de devis gratuits.",
+    eyebrow: "Menuisiers",
+    h1: "Devis de menuiserie, dictés pendant la prise de cotes",
+    intro:
+      "Vous prenez les cotes, vous dictez ce qu'il faut poser, et le devis arrive chiffré avec vos prix. Vous ajustez les dimensions et les finitions avant d'envoyer.",
+    sections: [
+      {
+        h2: "Ce qui fait un bon devis de menuiserie",
+        body: [
+          "Les dimensions et le sens d'ouverture, la finition (prépeint, laqué, brut) et qui fournit quoi.",
+          "La dépose de l'existant et l'évacuation, souvent oubliées.",
+          "Les postes annexes : habillages, bas de porte, barres de seuil, reprises de peinture non comprises.",
+        ],
+      },
+      {
+        h2: "TVA et rénovation",
+        body: [
+          "10 % en rénovation d'un logement de plus de 2 ans. Certaines fenêtres performantes peuvent relever de 5,5 % sous conditions : jingr vous le rappelle, vous vérifiez.",
+        ],
+      },
+    ],
+    faq: [
+      ["Je travaille avec plusieurs fournisseurs, ça marche ?", "Oui : vos prix de vente sont dans votre tarif, quel que soit le fournisseur. Vous pouvez aussi corriger une ligne avant de valider."],
+      ["Puis-je exporter vers mon logiciel ?", "Oui, chaque devis s'exporte en CSV en un clic."],
+    ],
+    templates: ["pose-fenetre-pvc", "pose-porte-interieure", "pose-parquet-flottant"],
+  },
+  {
+    slug: "devis-peintre-plaquiste-carreleur",
+    title: "Devis peintre, plaquiste, carreleur : au m², dicté depuis le chantier",
+    description:
+      "Peinture, cloisons placo, carrelage : dictez les surfaces et les travaux depuis le téléphone, recevez un devis au m² chiffré avec vos prix, préparation comprise. Modèles de devis gratuits.",
+    eyebrow: "Peintres · plaquistes · carreleurs",
+    h1: "Devis au m², sans retaper les surfaces le soir",
+    intro:
+      "Vous mesurez, vous dictez les surfaces et ce qu'il faut faire. jingr prépare les lignes au m² ou au mètre linéaire avec vos prix, préparation des supports comprise.",
+    sections: [
+      {
+        h2: "Les erreurs qui coûtent cher",
+        body: [
+          "Chiffrer au m² de sol au lieu de la surface réellement traitée (murs, deux faces d'une cloison).",
+          "Oublier la préparation : rebouchage, ponçage, ragréage. C'est elle qui prend du temps.",
+          "Ne pas préciser qui fournit les matériaux (carrelage, peinture) et la part de chutes prévue.",
+        ],
+      },
+    ],
+    faq: [
+      ["Je peux dicter plusieurs pièces d'un coup ?", "Oui : décrivez pièce par pièce, jingr fait une ligne par poste. Vous regroupez ou détaillez avant de valider."],
+      ["Et la TVA ?", "10 % en rénovation d'un logement de plus de 2 ans, 20 % dans le neuf. Vous vérifiez avant validation."],
+    ],
+    templates: ["peinture-murs-plafonds", "pose-cloison-placo", "pose-carrelage-sol"],
+  },
 ];
 
 export function findLanding(slug: string): Landing | undefined {
