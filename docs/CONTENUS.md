@@ -41,6 +41,14 @@ Jamais de faux témoignage, jamais de chiffre inventé. Un post = une idée.
 
 ## Groupes Facebook d'artisans (1 par semaine, utile avant tout)
 
+Règles pour ne pas se faire exclure :
+- Lire le règlement du groupe. Beaucoup interdisent la pub, ou la limitent à un jour par semaine.
+- Écrire d'abord à l'admin : « je développe un outil pour les artisans, puis-je partager des modèles de devis gratuits ? ». Ne publier qu'avec son accord.
+- Rester membre actif 1 à 2 semaines avant de poster : répondre à des questions (TVA, mentions du devis, facture électronique 2027).
+- Pas de lien dans le post si le groupe le refuse. Proposer plutôt « je vous l'envoie en message privé ».
+- Un seul post par groupe, jamais le même texte copié dans 10 groupes le même jour.
+- Ne jamais écrire en privé à des membres sans qu'ils l'aient demandé.
+
 > Bonjour à tous 👋 On a mis en ligne des modèles de devis gratuits, avec les lignes, les prix HT indicatifs, la bonne TVA et les erreurs classiques à éviter : chauffe-eau, fuite, tableau électrique, fenêtre PVC, gouttière zinc…
 >
 > 👉 jingr.ai/modele-devis/remplacement-chauffe-eau (les autres sont en bas de la page)
