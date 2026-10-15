@@ -117,6 +117,9 @@ export default function OpsPage() {
           <input
             className="input"
             type="password"
+            autoCapitalize="none"
+            autoCorrect="off"
+            autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Mot de passe ops"

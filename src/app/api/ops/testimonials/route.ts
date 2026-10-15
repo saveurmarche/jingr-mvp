@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { db } from "@/lib/db";
+import { db, normalizePhone } from "@/lib/db";
 import { checkOpsPassword } from "@/lib/ops-auth";
 import { pilotMetrics } from "@/lib/pilot-metrics";
 import { listPageHits } from "@/lib/page-hits";
@@ -22,6 +22,13 @@ function summarizeHits(hits: { day: string; path: string; source: string; count:
   };
 }
 
+/** Les numéros de test (TEST_PHONES, séparés par des virgules) ne comptent pas dans le pilote. */
+const TEST_PHONES = (process.env.TEST_PHONES || "+33600000000,+33600000099").split(",").map((p) => p.trim());
+function withoutTestArtisans<T extends { artisans: { id: string; phone: string }[]; jobs: { artisan_id: string }[] }>(s: T): T {
+  const test = new Set(s.artisans.filter((a) => TEST_PHONES.includes(normalizePhone(a.phone))).map((a) => a.id));
+  return { ...s, artisans: s.artisans.filter((a) => !test.has(a.id)), jobs: s.jobs.filter((j) => !test.has(j.artisan_id)) };
+}
+
 function unauthorized() {
   return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
 }
@@ -35,7 +42,7 @@ export async function GET(req: NextRequest) {
     testimonials: await db.listTestimonials(),
     deletion_requests: deletions.map((d) => ({ phone: d.from_phone, at: d.created_at })),
     beta_signups: await db.listBetaSignups(),
-    pilot: pilotMetrics(await db.snapshot()),
+    pilot: pilotMetrics(withoutTestArtisans(await db.snapshot())),
     pioneer_payments: pioneers.map((d) => ({ phone: d.from_phone, at: d.created_at })),
     visits: summarizeHits(await listPageHits()),
   });
