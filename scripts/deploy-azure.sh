@@ -63,6 +63,8 @@ az webapp config appsettings set -n "$APP" -g "$RG" --settings "${SETTINGS[@]}" 
 echo "→ Build local (Next.js standalone)"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 BUILD="$(mktemp -d)"
+# Le dossier de build (sources + node_modules, plusieurs centaines de Mo) est supprimé à la fin, même en cas d'erreur.
+trap '[[ -n "${BUILD:-}" && "$BUILD" == /tmp/* ]] && rm -rf -- "$BUILD"' EXIT
 # On build le code commité (HEAD), pas l'état de travail local.
 git -C "$ROOT" archive --format=tar HEAD | tar -x -C "$BUILD"
 (cd "$BUILD" && npm ci --no-audit --no-fund && npm run build)
