@@ -83,6 +83,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               <Link href="/devis-artisan-sans-logiciel" className="hover:text-[#7a5bb5]">Sans logiciel</Link>
               <Link href="/devis-ia-artisan" className="hover:text-[#7a5bb5]">Devis par IA</Link>
               <Link href="/demo" className="hover:text-[#7a5bb5]">Démo 30 s</Link>
+              <Link href="/modele-devis" className="hover:text-[#7a5bb5]">Modèles de devis</Link>
               <Link href="/devis-plombier-chauffagiste" className="hover:text-[#7a5bb5]">Plombiers</Link>
               <Link href="/devis-electricien" className="hover:text-[#7a5bb5]">Électriciens</Link>
               <Link href="/logiciel-devis-artisan-lille" className="hover:text-[#7a5bb5]">Lille</Link>

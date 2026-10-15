@@ -28,7 +28,7 @@ Points clés :
 - [Facture électronique 2027 pour les artisans](${base}/facture-electronique-artisan)
 ${landings.map((l) => `- [${l.h1}](${base}/${l.slug}) : ${l.description}`).join("\n")}
 
-## Modèles de devis gratuits
+## Modèles de devis gratuits ([tous les modèles par métier](${base}/modele-devis))
 ${catalog.map((e) => `- [${e.title}](${base}/modele-devis/${e.slug})`).join("\n")}
 
 ## Contact

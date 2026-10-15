@@ -9,7 +9,7 @@ export type CatalogLine = { label: string; qty: number; unit: string; pu: number
 
 export type CatalogEntry = {
   slug: string;
-  metier: "plombier" | "chauffagiste" | "électricien" | "menuisier" | "couvreur";
+  metier: "plombier" | "chauffagiste" | "électricien" | "menuisier" | "couvreur" | "peintre" | "carreleur" | "plaquiste";
   title: string;
   short: string;
   tva: number;
@@ -274,6 +274,106 @@ export const catalog: CatalogEntry[] = [
     pitfalls: [
       "Oublier l'accès (échafaudage, nacelle) : c'est souvent le poste le plus cher.",
       "Ne pas vérifier l'état des voliges et de la planche de rive avant de chiffrer.",
+    ],
+  },
+  {
+    slug: "peinture-murs-plafonds",
+    metier: "peintre",
+    title: "Peinture des murs et plafonds d'une pièce",
+    short: "Protection, préparation des supports, impression et deux couches de finition sur murs et plafond.",
+    tva: 10,
+    tvaNote: "TVA 10 % en rénovation d'un logement de plus de 2 ans (attestation simplifiée du client).",
+    lines: [
+      { label: "Protection des sols et des meubles, bâchage", qty: 1, unit: "forfait", pu: 60 },
+      { label: "Préparation des murs : rebouchage, ponçage, dépoussiérage", qty: 38, unit: "m²", pu: 7 },
+      { label: "Impression des murs (sous-couche)", qty: 38, unit: "m²", pu: 6 },
+      { label: "Peinture murs acrylique mate, 2 couches", qty: 38, unit: "m²", pu: 14 },
+      { label: "Préparation et peinture plafond blanc mat, 2 couches", qty: 14, unit: "m²", pu: 22 },
+      { label: "Nettoyage de fin de chantier", qty: 1, unit: "forfait", pu: 40 },
+    ],
+    pitfalls: [
+      "Chiffrer au m² de sol au lieu du m² de surface réellement peinte (murs déduits des ouvertures).",
+      "Oublier la préparation des supports : c'est elle qui fait le rendu, et le temps passé.",
+      "Ne pas préciser le nombre de couches et la finition (mat, velours, satin).",
+    ],
+  },
+  {
+    slug: "pose-carrelage-sol",
+    metier: "carreleur",
+    title: "Pose de carrelage au sol",
+    short: "Dépose de l'ancien revêtement, ragréage, pose collée de carrelage, joints et plinthes.",
+    tva: 10,
+    tvaNote: "TVA 10 % en rénovation d'un logement de plus de 2 ans ; 20 % sur un logement neuf.",
+    lines: [
+      { label: "Dépose et évacuation ancien revêtement de sol", qty: 20, unit: "m²", pu: 12 },
+      { label: "Ragréage autolissant (épaisseur jusqu'à 5 mm)", qty: 20, unit: "m²", pu: 16 },
+      { label: "Pose collée carrelage 60x60 (fourniture client ou à chiffrer à part)", qty: 20, unit: "m²", pu: 42 },
+      { label: "Joints et finitions", qty: 20, unit: "m²", pu: 5 },
+      { label: "Fourniture et pose plinthes assorties", qty: 18, unit: "ml", pu: 14 },
+    ],
+    pitfalls: [
+      "Ne pas préciser qui fournit le carrelage, ni le pourcentage de chutes prévu (souvent 10 %).",
+      "Oublier le ragréage alors que le support n'est pas plan.",
+      "Ne pas distinguer pose droite et pose en diagonale, plus longue.",
+    ],
+  },
+  {
+    slug: "pose-cloison-placo",
+    metier: "plaquiste",
+    title: "Création d'une cloison en plaques de plâtre",
+    short: "Ossature métallique, isolant phonique, plaques BA13 deux faces, bandes et enduit prêts à peindre.",
+    tva: 10,
+    tvaNote: "TVA 10 % en rénovation d'un logement de plus de 2 ans.",
+    lines: [
+      { label: "Fourniture et pose ossature métallique (rails et montants 48 mm)", qty: 10, unit: "m²", pu: 18 },
+      { label: "Fourniture et pose laine minérale 45 mm (isolation phonique)", qty: 10, unit: "m²", pu: 9 },
+      { label: "Fourniture et pose plaques BA13, deux faces", qty: 20, unit: "m²", pu: 16 },
+      { label: "Bandes, enduit et ponçage, prêt à peindre", qty: 20, unit: "m²", pu: 11 },
+      { label: "Réservation et renfort pour bloc-porte", qty: 1, unit: "u", pu: 75 },
+    ],
+    pitfalls: [
+      "Compter la surface de cloison une seule fois alors que les plaques et l'enduit se posent sur deux faces.",
+      "Oublier le renfort pour un bloc-porte ou un meuble suspendu.",
+      "Ne pas préciser que la peinture n'est pas comprise.",
+    ],
+  },
+  {
+    slug: "pose-parquet-flottant",
+    metier: "menuisier",
+    title: "Pose de parquet flottant",
+    short: "Préparation du sol, sous-couche acoustique, pose flottante, plinthes et barres de seuil.",
+    tva: 10,
+    tvaNote: "TVA 10 % en rénovation d'un logement de plus de 2 ans.",
+    lines: [
+      { label: "Préparation du support et vérification de la planéité", qty: 25, unit: "m²", pu: 6 },
+      { label: "Fourniture et pose sous-couche acoustique", qty: 25, unit: "m²", pu: 5 },
+      { label: "Pose flottante parquet stratifié ou contrecollé (fourniture à chiffrer à part)", qty: 25, unit: "m²", pu: 22 },
+      { label: "Fourniture et pose plinthes", qty: 22, unit: "ml", pu: 12 },
+      { label: "Barres de seuil et découpes de portes", qty: 1, unit: "forfait", pu: 60 },
+    ],
+    pitfalls: [
+      "Oublier la sous-couche, ou en prévoir une incompatible avec un chauffage au sol.",
+      "Ne pas compter la découpe des bas de portes après la surépaisseur.",
+    ],
+  },
+  {
+    slug: "reparation-toiture-tuiles",
+    metier: "couvreur",
+    title: "Réparation de toiture : remplacement de tuiles",
+    short: "Accès, remplacement des tuiles cassées, révision du faîtage et vérification de l'étanchéité.",
+    tva: 10,
+    tvaNote: "TVA 10 % en rénovation d'un logement de plus de 2 ans.",
+    lines: [
+      { label: "Installation de l'accès (échelle de toit, sécurisation ou nacelle)", qty: 1, unit: "forfait", pu: 180 },
+      { label: "Dépose des tuiles cassées et contrôle des liteaux", qty: 1, unit: "forfait", pu: 90 },
+      { label: "Fourniture et pose de tuiles identiques", qty: 15, unit: "u", pu: 9 },
+      { label: "Révision et scellement du faîtage", qty: 6, unit: "ml", pu: 35 },
+      { label: "Contrôle d'étanchéité et nettoyage", qty: 1, unit: "forfait", pu: 60 },
+    ],
+    pitfalls: [
+      "Ne pas prévoir l'accès et la sécurité, souvent le poste le plus lourd.",
+      "Promettre des tuiles identiques sans avoir vérifié le modèle (certains ne se fabriquent plus).",
+      "Ne pas préciser que les liteaux ou la charpente abîmés feront l'objet d'un devis séparé.",
     ],
   },
 ];

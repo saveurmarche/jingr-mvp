@@ -51,7 +51,7 @@ Règles pour ne pas se faire exclure :
 
 > Bonjour à tous 👋 On a mis en ligne des modèles de devis gratuits, avec les lignes, les prix HT indicatifs, la bonne TVA et les erreurs classiques à éviter : chauffe-eau, fuite, tableau électrique, fenêtre PVC, gouttière zinc…
 >
-> 👉 jingr.ai/modele-devis/remplacement-chauffe-eau (les autres sont en bas de la page)
+> 👉 jingr.ai/modele-devis (tous les modèles, classés par métier)
 >
 > Si ça peut servir à quelqu'un. Et si vous avez des remarques sur les prix ou les lignes, je suis preneur, c'est fait pour être amélioré avec vous.
 
