@@ -207,8 +207,6 @@ export type DbShape = {
   testimonials: Testimonial[];
   client_links: ClientLink[];
   beta_signups: BetaSignup[];
-  /** Visites agrégées (jour × page × provenance), sans cookie ni donnée personnelle */
-  page_hits?: PageHit[];
 };
 
 /** Defaults for artisans loaded from older store.json without new fields */

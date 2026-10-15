@@ -4,7 +4,6 @@ import path from "path";
 import type {
   Artisan,
   BetaSignup,
-  PageHit,
   ClientLink,
   DbShape,
   Invoice,
@@ -33,7 +32,6 @@ const emptyDb = (): DbShape => ({
   testimonials: [],
   client_links: [],
   beta_signups: [],
-  page_hits: [],
 });
 
 function hasSupabaseConfig(): boolean {
@@ -684,24 +682,6 @@ export const db = {
     store.beta_signups.push(signup);
     await writeStore(store);
     return { signup, duplicate: false };
-  },
-
-  /** Compte une page vue (agrégée par jour, page et provenance). */
-  async recordHit(path: string, source: string, day = new Date().toISOString().slice(0, 10)): Promise<void> {
-    const store = await readStore();
-    const hits = (store.page_hits ??= []);
-    const row = hits.find((h) => h.day === day && h.path === path && h.source === source);
-    if (row) row.count += 1;
-    else hits.push({ day, path, source, count: 1 });
-    // On garde 120 jours.
-    const cutoff = new Date(Date.parse(day) - 120 * 86_400_000).toISOString().slice(0, 10);
-    store.page_hits = hits.filter((h) => h.day >= cutoff);
-    await writeStore(store);
-  },
-
-  async listPageHits(): Promise<PageHit[]> {
-    const store = await readStore();
-    return store.page_hits ?? [];
   },
 
   async listBetaSignups(): Promise<BetaSignup[]> {

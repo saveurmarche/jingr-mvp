@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { checkOpsPassword } from "@/lib/ops-auth";
 import { pilotMetrics } from "@/lib/pilot-metrics";
+import { listPageHits } from "@/lib/page-hits";
 
 /** Visites des 14 derniers jours : total par jour, top pages, top provenances. */
 function summarizeHits(hits: { day: string; path: string; source: string; count: number }[]) {
@@ -36,7 +37,7 @@ export async function GET(req: NextRequest) {
     beta_signups: await db.listBetaSignups(),
     pilot: pilotMetrics(await db.snapshot()),
     pioneer_payments: pioneers.map((d) => ({ phone: d.from_phone, at: d.created_at })),
-    visits: summarizeHits(await db.listPageHits()),
+    visits: summarizeHits(await listPageHits()),
   });
 }
 
