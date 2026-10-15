@@ -91,6 +91,22 @@ if [[ "$code" != "200" ]]; then
   exit 1
 fi
 echo "   https://$HOST/sitemap.xml → HTTP $(curl -s -o /dev/null -w '%{http_code}' "https://$HOST/sitemap.xml")"
+# Chaque page du sitemap doit répondre 200 (un build défectueux peut pré-générer des pages en 404).
+# Plusieurs essais : juste après le déploiement, l'ancien conteneur répond encore quelques dizaines de secondes.
+for attempt in 1 2 3 4; do
+  BAD=0
+  for u in $(curl -s "https://$HOST/sitemap.xml" | grep -o '<loc>[^<]*' | sed -E 's#<loc>https?://[^/]+##'); do
+    c="$(curl -s -o /dev/null -w '%{http_code}' "https://$HOST$u" || true)"
+    if [[ "$c" != "200" ]]; then [[ "$attempt" == 4 ]] && echo "   ❌ $u → HTTP $c"; BAD=$((BAD + 1)); fi
+  done
+  [[ "$BAD" -eq 0 ]] && break
+  [[ "$attempt" -lt 4 ]] && sleep 20
+done
+if [[ "$BAD" -gt 0 ]]; then
+  echo "❌ $BAD page(s) du sitemap en erreur après 4 essais : relancer le déploiement." >&2
+  exit 1
+fi
+echo "   Sitemap : toutes les pages répondent 200"
 echo
 echo "✅ jingr déployé : https://$HOST"
 echo "   Prochaine étape : brancher jingr.ai (scripts/dns-ovh.sh, après accord)."
