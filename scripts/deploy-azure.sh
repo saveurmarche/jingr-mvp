@@ -67,8 +67,9 @@ BUILD="$(mktemp -d)"
 git -C "$ROOT" archive --format=tar HEAD | tar -x -C "$BUILD"
 (cd "$BUILD" && npm ci --no-audit --no-fund && npm run build)
 PKG="$BUILD/.next/standalone"
-cp -r "$BUILD/public" "$PKG/public"
-mkdir -p "$PKG/.next" && cp -r "$BUILD/.next/static" "$PKG/.next/static"
+# Le contenu de public/ (le standalone peut déjà créer le dossier : copier « dedans » donnerait public/public)
+mkdir -p "$PKG/public" && cp -r "$BUILD/public/." "$PKG/public/"
+mkdir -p "$PKG/.next/static" && cp -r "$BUILD/.next/static/." "$PKG/.next/static/"
 ZIP="$BUILD/jingr.zip"
 (cd "$PKG" && zip -qr "$ZIP" .)
 
