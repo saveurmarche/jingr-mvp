@@ -22,7 +22,7 @@ export const landings: Landing[] = [
     slug: "devis-whatsapp-artisan",
     title: "Faire un devis artisan depuis WhatsApp : un vocal, un devis chiffré",
     description:
-      "Envoyez un vocal WhatsApp depuis le chantier et recevez un devis chiffré avec vos prix, à relire et valider. Sans application à installer. Pour les artisans du bâtiment.",
+      "Dictez votre chantier depuis le téléphone et recevez un devis chiffré avec vos prix, à relire et valider. Envoi par vocal WhatsApp très bientôt. Sans application à installer.",
     eyebrow: "Devis par WhatsApp",
     h1: "Votre devis, depuis WhatsApp, sans rien installer",
     intro:
