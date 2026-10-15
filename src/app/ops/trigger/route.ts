@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { checkOpsPassword } from "@/lib/ops-auth";
 import { generateDraftForJob } from "@/lib/draft-pipeline";
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
   const password = String(body.password || "");
-  const expected = process.env.OPS_PASSWORD || "jingr-ops";
-  if (password !== expected) {
+  if (!checkOpsPassword(password)) {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
   const jobId = String(body.job_id || "");

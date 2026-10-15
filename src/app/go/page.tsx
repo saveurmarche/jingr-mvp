@@ -25,6 +25,13 @@ export default function GoPage() {
     fd.set("source", "web");
     fd.set("auto_draft", "true");
 
+    const audioInput = form.querySelector<HTMLInputElement>('input[name="audio"]');
+    if (!String(fd.get("description") || "").trim() && !audioInput?.files?.length) {
+      setResult({ ok: false, error: "Ajoutez un vocal ou une description du chantier" });
+      setLoading(false);
+      return;
+    }
+
     // Ensure photos field name is "photos"
     const photosInput = form.querySelector<HTMLInputElement>('input[name="photos"]');
     if (photosInput?.files && photosInput.files.length > 3) {
@@ -52,13 +59,13 @@ export default function GoPage() {
       <div>
         <h1 className="text-2xl font-bold text-stone-900">Envoyer un chantier</h1>
         <p className="mt-1 text-stone-600">
-          Mobile-first. Photos des notes, préférences, brouillon en retour.
+          Un vocal ou quelques lignes suffisent. Le devis revient en quelques minutes, à relire avant envoi.
         </p>
       </div>
 
       <form onSubmit={onSubmit} className="card space-y-4" encType="multipart/form-data">
         <fieldset className="space-y-3">
-          <legend className="mb-1 text-sm font-semibold text-[#6B4EFF]">
+          <legend className="mb-1 text-sm font-semibold text-[#7b5ea7]">
             Vous (artisan)
           </legend>
           <div>
@@ -69,6 +76,13 @@ export default function GoPage() {
             <label className="label" htmlFor="artisan_phone">Téléphone</label>
             <input className="input" id="artisan_phone" name="artisan_phone" required placeholder="06 12 34 56 78" />
           </div>
+        </fieldset>
+
+        <details className="rounded-xl border border-[#ebe4da] px-3 py-2">
+          <summary className="cursor-pointer text-sm font-semibold text-[#7b5ea7]">
+            Options : entreprise, marge, TVA (facultatif)
+          </summary>
+          <div className="mt-3 space-y-3">
           <div>
             <label className="label" htmlFor="company_name">Entreprise (optionnel)</label>
             <input className="input" id="company_name" name="company_name" placeholder="Martin Plomberie" />
@@ -80,15 +94,9 @@ export default function GoPage() {
             </div>
             <div>
               <label className="label" htmlFor="city">Ville (optionnel)</label>
-              <input className="input" id="city" name="city" placeholder="Lyon" />
+              <input className="input" id="city" name="city" placeholder="Lille" />
             </div>
           </div>
-        </fieldset>
-
-        <fieldset className="space-y-3">
-          <legend className="mb-1 text-sm font-semibold text-[#6B4EFF]">
-            Préférences devis
-          </legend>
           <div className="flex items-center justify-between gap-3 rounded-xl border border-[#ebe4da] bg-[#fffcf8] px-3 py-3">
             <div>
               <p className="text-sm font-semibold text-stone-800">Tutoiement client</p>
@@ -102,7 +110,7 @@ export default function GoPage() {
               aria-checked={tutoiement}
               onClick={() => setTutoiement((v) => !v)}
               className={`relative h-8 w-14 rounded-full transition ${
-                tutoiement ? "bg-[#6B4EFF]" : "bg-stone-300"
+                tutoiement ? "bg-[#7b5ea7]" : "bg-stone-300"
               }`}
             >
               <span
@@ -134,10 +142,11 @@ export default function GoPage() {
               </select>
             </div>
           </div>
-        </fieldset>
+          </div>
+        </details>
 
         <fieldset className="space-y-3">
-          <legend className="mb-1 text-sm font-semibold text-[#6B4EFF]">
+          <legend className="mb-1 text-sm font-semibold text-[#7b5ea7]">
             Le chantier
           </legend>
           <div>
@@ -146,19 +155,32 @@ export default function GoPage() {
           </div>
           <div>
             <label className="label" htmlFor="client_address">Adresse</label>
-            <input className="input" id="client_address" name="client_address" placeholder="12 rue Victor Hugo, 69003 Lyon" />
+            <input className="input" id="client_address" name="client_address" placeholder="12 rue Nationale, 59000 Lille" />
           </div>
           <div>
             <label className="label" htmlFor="client_phone">Tél. client (optionnel)</label>
             <input className="input" id="client_phone" name="client_phone" placeholder="06 …" />
           </div>
           <div>
-            <label className="label" htmlFor="description">Description</label>
+            <label className="label" htmlFor="audio">🎙️ Vocal (le plus rapide)</label>
+            <input
+              className="input"
+              id="audio"
+              name="audio"
+              type="file"
+              accept="audio/*"
+              capture="user"
+            />
+            <p className="mt-1 text-xs text-stone-400">
+              Dictez comme à un collègue : « Mme Dupont, 12 rue Nationale à Lille, cumulus 200 litres HS, à remplacer… »
+            </p>
+          </div>
+          <div>
+            <label className="label" htmlFor="description">Ou par écrit</label>
             <textarea
               className="input min-h-28"
               id="description"
               name="description"
-              required
               placeholder="Chauffe-eau électrique HS, à remplacer par un 200L…"
             />
           </div>
@@ -215,7 +237,7 @@ export default function GoPage() {
         <div className={`card ${result.ok ? "border-[#c4b5fd]" : "border-red-200"}`}>
           {result.ok ? (
             <div className="space-y-3">
-              <p className="font-semibold text-[#6B4EFF]">Brouillon prêt</p>
+              <p className="font-semibold text-[#7b5ea7]">Brouillon prêt</p>
               <p className="text-sm text-stone-600">
                 Job {result.job_id}. Relisez et validez avant tout envoi client.
               </p>

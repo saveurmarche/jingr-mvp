@@ -17,3 +17,6 @@ npm-debug.log*
 !/public/uploads/.gitkeep
 /data/uploads/*
 !/data/uploads/.gitkeep
+
+# Listes de prospects (données personnelles, ne jamais committer)
+/data/*.csv
