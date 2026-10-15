@@ -33,6 +33,8 @@ export default function OpsPage() {
   const [pilot, setPilot] = useState<PilotMetrics | null>(null);
   const [pioneerPay, setPioneerPay] = useState<{ phone: string; at: string }[]>([]);
   const [deletions, setDeletions] = useState<{ phone: string; at: string }[]>([]);
+  type Kv = { k: string; n: number };
+  const [visits, setVisits] = useState<{ total: number; by_day: Kv[]; top_pages: Kv[]; top_sources: Kv[] } | null>(null);
   const [beta, setBeta] = useState<
     { id: string; first_name: string; last_name?: string | null; email: string; trade?: string | null; phone?: string | null; message?: string | null; software?: string | null; created_at: string }[]
   >([]);
@@ -52,6 +54,7 @@ export default function OpsPage() {
       setBeta(tJson.beta_signups ?? []);
       setPilot(tJson.pilot ?? null);
       setPioneerPay(tJson.pioneer_payments ?? []);
+      setVisits(tJson.visits ?? null);
     }
   }, [password]);
 
@@ -153,6 +156,31 @@ export default function OpsPage() {
               {d.phone} — {new Date(d.at).toLocaleDateString("fr-FR")}
             </p>
           ))}
+        </section>
+      ) : null}
+
+      {visits ? (
+        <section className="space-y-3">
+          <h1 className="text-2xl font-bold">Visites (14 jours) : {visits.total}</h1>
+          <p className="text-sm text-stone-500">Sans cookie, robots exclus, pages privées non comptées.</p>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {[
+              ["Par jour", visits.by_day],
+              ["Pages", visits.top_pages],
+              ["Provenance", visits.top_sources],
+            ].map(([title, rows]) => (
+              <div key={title as string} className="card space-y-1 text-sm">
+                <p className="font-semibold">{title as string}</p>
+                {(rows as Kv[]).length === 0 ? <p className="text-stone-500">—</p> : null}
+                {(rows as Kv[]).map((r) => (
+                  <p key={r.k} className="flex justify-between gap-2">
+                    <span className="truncate">{r.k}</span>
+                    <strong>{r.n}</strong>
+                  </p>
+                ))}
+              </div>
+            ))}
+          </div>
         </section>
       ) : null}
 

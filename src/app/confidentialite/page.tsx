@@ -119,6 +119,11 @@ export default function ConfidentialitePage() {
         jingr n&apos;utilise aucun cookie publicitaire ni de mesure d&apos;audience tiers. Seuls des
         éléments strictement nécessaires au fonctionnement du site peuvent être déposés.
       </p>
+      <p>
+        Pour savoir quelles pages sont utiles, nous comptons les pages vues de façon agrégée : le jour,
+        la page et la provenance (par exemple « lien d&apos;un e-mail » ou le site d&apos;origine). Aucun
+        cookie, aucune adresse IP ni aucun identifiant ne sont conservés.
+      </p>
 
       <H2>9. Modifications</H2>
       <p>

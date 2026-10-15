@@ -157,3 +157,23 @@ test("quote terms: validity date, expiry and deposit on TTC (HT in franchise)", 
   assert.equal(quoteTerms(draft, { ...artisan, validity_days: 15 }, new Date("2026-10-20T00:00:00Z")).expired, true);
   assert.equal(quoteTerms(draft, null).acomptePct, 0);
 });
+
+test("visits: page hits aggregated per day, page and source", async () => {
+  const { mkdtempSync, readFileSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+  const { execFileSync } = await import("node:child_process");
+  const dir = mkdtempSync(join(tmpdir(), "jingr-hits-"));
+  const script = `
+    const m = await import(${JSON.stringify(new URL("../src/lib/db.ts", import.meta.url).href)});
+    const db = m.db ?? m.default.db;
+    await db.recordHit("/demo", "mail", "2026-10-15");
+    await db.recordHit("/demo", "mail", "2026-10-15");
+    await db.recordHit("/", "direct", "2026-10-15");`;
+  execFileSync(process.execPath, ["--import", "tsx", "--input-type=module", "-e", script], { env: { ...process.env, DATA_DIR: dir } });
+  const hits = JSON.parse(readFileSync(join(dir, "store.json"), "utf8")).page_hits;
+  assert.deepEqual(hits, [
+    { day: "2026-10-15", path: "/demo", source: "mail", count: 2 },
+    { day: "2026-10-15", path: "/", source: "direct", count: 1 },
+  ]);
+});
