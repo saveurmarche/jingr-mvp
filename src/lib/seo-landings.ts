@@ -167,6 +167,49 @@ export const landings: Landing[] = [
     ],
     templates: ["remplacement-tableau-electrique", "creation-circuit-prises-cuisine", "installation-spots-led"],
   },
+  {
+    slug: "devis-ia-artisan",
+    title: "Devis par IA pour artisan : comment ça marche, ce qu'il faut vérifier",
+    description:
+      "Faire ses devis avec l'IA quand on est artisan du bâtiment : ce que l'IA fait bien, ce qu'elle ne doit jamais faire seule, et comment garder vos prix. Guide simple, sans jargon.",
+    eyebrow: "Devis et IA",
+    h1: "Faire ses devis avec l'IA, sans perdre la main",
+    intro:
+      "L'IA peut rédiger un devis en quelques secondes à partir d'un vocal ou de quelques mots. Mais un devis engage l'artisan : prix, TVA, mentions. Voici ce qu'il faut attendre d'un outil de devis par IA, et ce qu'il ne doit jamais faire à votre place.",
+    sections: [
+      {
+        h2: "Ce que l'IA fait bien",
+        body: [
+          "Transformer une description de chantier (« chauffe-eau 200 L à changer, groupe de sécurité, évacuation de l'ancien ») en lignes de devis claires : fourniture, dépose, pose, déplacement.",
+          "Rédiger l'introduction et les précisions qui évitent les litiges : ce qui est compris, ce qui ne l'est pas.",
+          "Aller vite : le devis est prêt à relire pendant que vous êtes encore sur le chantier ou dans le camion.",
+        ],
+      },
+      {
+        h2: "Ce qu'elle ne doit jamais faire seule",
+        body: [
+          "Inventer des prix. Un prix moyen trouvé sur Internet n'est pas votre prix. Un bon outil part de votre tarif et signale clairement ce qu'il ne connaît pas.",
+          "Envoyer le devis au client sans vous. Le devis vous engage : c'est vous qui validez, ligne par ligne si besoin.",
+          "Choisir la TVA à votre place sans contrôle. 10 %, 5,5 % ou 20 % dépend du logement et des travaux ; l'outil propose, vous vérifiez.",
+        ],
+      },
+      {
+        h2: "Comment jingr s'y prend",
+        body: [
+          "Vous dictez le chantier sur WhatsApp ou sur votre téléphone. jingr prépare le devis avec les prix de votre tarif et de vos devis déjà validés.",
+          "Un prix inconnu apparaît en orange, « à confirmer ». Tant qu'il en reste, le devis ne peut pas être validé.",
+          "Vous relisez, vous validez, votre client reçoit un lien et accepte en ligne. Démo de 30 secondes sur jingr.ai/demo.",
+        ],
+      },
+    ],
+    faq: [
+      ["L'IA connaît-elle mes prix ?", "Pas au départ. Vous collez votre tarif une fois (depuis Excel par exemple), et chaque devis validé le complète. Ce que jingr ne connaît pas est marqué « à confirmer »."],
+      ["Mes données servent-elles à entraîner une IA ?", "Non. Le texte du chantier sert uniquement à rédiger votre devis ; il ne sert pas à entraîner des modèles. Les données sont hébergées en France."],
+      ["Est-ce que je reste responsable du devis ?", "Oui, comme avec n'importe quel logiciel : vous relisez et validez avant envoi. jingr gère les mentions obligatoires et les calculs, vous gardez le dernier mot."],
+      ["Combien ça coûte ?", "49 € HT par mois, sans engagement. Les premiers artisans pilotes de la métropole lilloise l'utilisent gratuitement pendant le pilote."],
+    ],
+    templates: ["remplacement-chauffe-eau", "remplacement-tableau-electrique", "pose-fenetre-pvc"],
+  },
 ];
 
 export function findLanding(slug: string): Landing | undefined {
