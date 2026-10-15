@@ -102,7 +102,7 @@ export default async function ModeleDevisPage({
           Ce devis, en 2 minutes, depuis le chantier
         </h2>
         <p className="text-stone-600">
-          Dictez « {e.title.toLowerCase()} chez Mme Martin, 8 rue des Lilas… » sur WhatsApp.
+          Dictez « {e.title.toLowerCase()} chez Mme Martin, 8 rue des Lilas… » depuis votre téléphone.
           jingr vous renvoie ce devis avec vos prix et votre marge, prêt à relire et à envoyer.
           La facture suit en un clic.
         </p>

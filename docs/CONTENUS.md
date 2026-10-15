@@ -61,6 +61,6 @@ Règles pour ne pas se faire exclure :
 - **Catégorie** : Éditeur de logiciels (secondaire : Service de conseil aux entreprises)
 - **Zone desservie** : Lille, Roubaix, Tourcoing, Villeneuve-d'Ascq, Marcq-en-Barœul et métropole
 - **Description** (750 caractères max) :
-  > jingr aide les artisans du bâtiment de la métropole lilloise à faire leurs devis sans logiciel : un vocal WhatsApp depuis le chantier, et le devis chiffré avec vos propres prix arrive quelques minutes plus tard. Vous relisez, vous validez, votre client signe en ligne, la facture se fait en un clic. Plombiers, électriciens, chauffagistes, menuisiers : on passe vous montrer en 10 minutes. Pilote gratuit de 3 mois pour les 10 premiers artisans, puis 39 € HT par mois à vie.
+  > jingr aide les artisans du bâtiment de la métropole lilloise à faire leurs devis sans logiciel : un vocal depuis le chantier, sur le téléphone, et le devis chiffré avec vos propres prix arrive quelques minutes plus tard. Vous relisez, vous validez, votre client signe en ligne, la facture se fait en un clic. Plombiers, électriciens, chauffagistes, menuisiers : on passe vous montrer en 10 minutes. Pilote gratuit de 3 mois pour les 10 premiers artisans, puis 39 € HT par mois à vie.
 - **Site** : https://jingr.ai/logiciel-devis-artisan-lille
 - **Téléphone** : 06 88 67 72 94

@@ -62,7 +62,7 @@ export default function FactureElectroniquePage() {
       <section className="card space-y-4 border-[#c4b5fd]">
         <h2 className="text-xl font-bold text-stone-900">Avec jingr, vous êtes déjà sur de bons rails</h2>
         <p className="text-stone-600">
-          Devis dicté par WhatsApp, facture en un clic avec numérotation et mentions légales,
+          Devis dicté depuis le chantier, facture en un clic avec numérotation et mentions légales,
           données structurées prêtes pour la plateforme agréée.
         </p>
         <StartCta label="Essayer gratuitement" />

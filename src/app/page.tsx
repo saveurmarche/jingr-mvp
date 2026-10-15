@@ -15,7 +15,7 @@ const PIONEER_PRICE = process.env.NEXT_PUBLIC_PIONEER_PRICE || "39";
 
 const ticker = [
   "Devis avant le concurrent",
-  "Vocal WhatsApp · photos · PDF",
+  "Vocal · photos · PDF",
   "Votre ton · votre validation",
   "Acceptation en ligne",
   "Facture en un clic",
@@ -33,11 +33,11 @@ const problems: [string, string, string][] = [
 const steps: { n: number; title: string; text: string; tile: React.ReactNode }[] = [
   {
     n: 1,
-    title: "WhatsApp / vocal",
+    title: "Vocal depuis le chantier",
     text: "Dictez le chantier en sortant de chez le client, ou tapez 5 lignes. Ce que vous avez sous la main.",
     tile: (
       <div className="tile tile-green">
-        <p className="tile-label !text-emerald-700">WhatsApp</p>
+        <p className="tile-label !text-emerald-700">Vocal</p>
         <p className="mt-1 text-sm text-emerald-900">« Remplacement mitigeur cuisine + raccord cuivre, Mme Dupont, devis pour demain… »</p>
       </div>
     ),
@@ -105,7 +105,7 @@ const zones = [
 ];
 
 const faq: [string, string][] = [
-  ["Je dois installer un logiciel ?", "Non. Vous envoyez un vocal WhatsApp depuis le chantier, comme à un collègue. Le devis arrive par lien, vous le corrigez sur votre téléphone."],
+  ["Je dois installer un logiciel ?", "Non. Vous dictez le chantier depuis votre téléphone, comme un vocal à un collègue (bientôt directement sur WhatsApp). Le devis arrive par lien, vous le corrigez sur votre téléphone."],
   ["Les prix, c'est les miens ?", "Vous réglez votre marge et votre TVA une fois. Chaque ligne reste modifiable avant validation. Rien ne part chez le client sans vous."],
   ["Comment mon client reçoit le devis ?", "Vous lui envoyez un lien (WhatsApp ou e-mail). Il consulte le devis, le télécharge en PDF et l'accepte en ligne. Vous êtes prévenu tout de suite."],
   ["Et la facture ?", "Chantier terminé : un clic sur « Transformer en facture ». Numérotation, échéance et mentions légales (pénalités, indemnité de 40 €, franchise de TVA si micro) sont ajoutées automatiquement."],
@@ -119,9 +119,9 @@ const jsonLd = [
     "@type": "SoftwareApplication",
     name: "jingr",
     applicationCategory: "BusinessApplication",
-    operatingSystem: "Web, WhatsApp",
+    operatingSystem: "Web",
     description:
-      "Devis et factures pour artisans du bâtiment : un vocal WhatsApp depuis le chantier, un devis chiffré à relire, acceptation en ligne, facture en un clic.",
+      "Devis et factures pour artisans du bâtiment : un vocal depuis le chantier, un devis chiffré à relire, acceptation en ligne, facture en un clic.",
     url: "https://jingr.ai",
     offers: { "@type": "Offer", price: PRICE, priceCurrency: "EUR", description: "Par mois, hors TVA" },
   },
@@ -150,7 +150,7 @@ export default async function HomePage() {
             <span className="text-[#7a5bb5]">Son devis était déjà parti.</span>
           </h1>
           <p className="mx-auto max-w-2xl text-lg font-light leading-relaxed text-[#6f6a7d]">
-            Sans logiciel à apprendre : un vocal WhatsApp depuis le chantier, et votre devis chiffré arrive avec
+            Sans logiciel à apprendre : un vocal depuis le chantier, sur votre téléphone, et votre devis chiffré arrive avec
             vos prix. Vous validez, votre client signe en ligne, la facture suit en un clic. Et une petite équipe à
             Lille qui vient vous montrer.
           </p>
@@ -165,7 +165,7 @@ export default async function HomePage() {
 
           <div className="card mx-auto grid max-w-2xl gap-3 p-4 text-left sm:grid-cols-2">
             <div className="tile tile-green">
-              <p className="tile-label !text-emerald-700">WhatsApp · vocal</p>
+              <p className="tile-label !text-emerald-700">Vocal · téléphone</p>
               <p className="mt-1 text-sm">« Changement chauffe-eau 200 L, rue des Lilas, cliente Mme Martin… »</p>
               <p className="mt-1 text-xs text-[#6f6a7d]">Dicté en sortant du chantier</p>
             </div>
@@ -223,12 +223,12 @@ export default async function HomePage() {
         <div className="max-w-xl space-y-3">
           <p className="eyebrow">Le process</p>
           <h2 className="text-4xl font-bold leading-tight">
-            WhatsApp devis artisan.
+            Un vocal, un devis.
             <br />
             Du chantier au devis signé.
           </h2>
           <p className="font-light leading-relaxed text-[#6f6a7d]">
-            Pas de logiciel lourd. Vous dictez sur WhatsApp, vous prenez une photo, jingr rédige. Vous validez
+            Pas de logiciel lourd. Vous dictez depuis votre téléphone, vous prenez une photo, jingr rédige. Vous validez
             avant tout envoi au client.
           </p>
         </div>
@@ -256,11 +256,11 @@ export default async function HomePage() {
           <p className="eyebrow">Démo</p>
           <h2 className="text-4xl font-bold leading-tight">Un vocal → un devis prêt à envoyer.</h2>
           <p className="font-light leading-relaxed text-[#6f6a7d]">
-            1) un vocal WhatsApp → 2) deux ou trois photos → 3) vous relisez le devis → 4) votre client
+            1) un vocal depuis le téléphone → 2) deux ou trois photos → 3) vous relisez le devis → 4) votre client
             l&apos;accepte en ligne. Sans formation, sans catalogue à configurer.
           </p>
           <div className="flex flex-wrap gap-2">
-            <span className="chip">1 WhatsApp</span>
+            <span className="chip">1 Vocal</span>
             <span className="chip">2 Photos</span>
             <span className="chip">3 Vous validez</span>
             <span className="chip">4 Client accepte</span>
@@ -268,7 +268,7 @@ export default async function HomePage() {
           <div className="card space-y-2 text-sm">
             <p className="font-semibold">jingr vs logiciel de devis classique</p>
             <p><strong>Pas d&apos;ERP</strong> : pas de paramétrage, pas de formation. Un assistant de terrain.</p>
-            <p><strong>WhatsApp d&apos;abord</strong> : vocal et photos depuis le chantier, le PDF vient après.</p>
+            <p><strong>Le téléphone d&apos;abord</strong> : vocal et photos depuis le chantier, le PDF vient après. Bientôt directement sur WhatsApp.</p>
             <p><strong>Vous validez</strong> : brouillon seulement, jamais d&apos;envoi automatique au client.</p>
           </div>
           <StartCta label="Tester sur mon prochain chantier" />

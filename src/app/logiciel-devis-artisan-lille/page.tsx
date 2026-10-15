@@ -9,7 +9,7 @@ const PIONEER_PRICE = process.env.NEXT_PUBLIC_PIONEER_PRICE || "39";
 export const metadata: Metadata = {
   title: "Logiciel de devis pour artisans à Lille : devis en vocal, facture en un clic",
   description:
-    "Plombiers, électriciens, chauffagistes, menuisiers de la métropole lilloise : dictez votre chantier sur WhatsApp, recevez un devis chiffré à relire, faites-le accepter en ligne. Petite équipe lilloise.",
+    "Plombiers, électriciens, chauffagistes, menuisiers de la métropole lilloise : dictez votre chantier depuis votre téléphone, recevez un devis chiffré à relire, faites-le accepter en ligne. Petite équipe lilloise.",
   alternates: { canonical: "/logiciel-devis-artisan-lille" },
 };
 
@@ -20,7 +20,7 @@ const villes = [
 ];
 
 const etapes: [string, string][] = [
-  ["Sur le chantier", "Vous dictez le chantier en vocal sur WhatsApp, une minute suffit : client, adresse, travaux."],
+  ["Sur le chantier", "Vous dictez le chantier en vocal sur votre téléphone, une minute suffit : client, adresse, travaux."],
   ["Quelques minutes après", "Vous recevez un devis chiffré avec vos prix. Ce que jingr ne connaît pas est marqué « à confirmer »."],
   ["Vous relisez", "Vous corrigez sur votre téléphone, vous validez. Rien ne part chez le client sans vous."],
   ["Votre client accepte", "Il reçoit un lien, consulte le devis et l'accepte en ligne. La facture suit en un clic, chantier fini."],
@@ -66,7 +66,7 @@ export default function LogicielDevisLillePage() {
         <p className="text-stone-700">
           Nous cherchons des artisans de la métropole pour tester jingr gratuitement pendant 3 mois et nous dire
           franchement ce qui va et ce qui ne va pas. Ensuite, {PIONEER_PRICE} € HT par mois à vie pour ces pionniers
-          (au lieu de {PRICE} €), résiliable en un message. Pas de logiciel à apprendre : tout se passe sur WhatsApp.
+          (au lieu de {PRICE} €), résiliable en un message. Pas de logiciel à apprendre : tout se passe sur votre téléphone.
           On peut passer vous montrer en 10 minutes.
         </p>
         <p className="text-sm text-stone-500">Nous intervenons notamment à : {villes.join(", ")}.</p>

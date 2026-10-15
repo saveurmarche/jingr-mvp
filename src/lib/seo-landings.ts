@@ -26,7 +26,7 @@ export const landings: Landing[] = [
     eyebrow: "Devis par WhatsApp",
     h1: "Votre devis, depuis WhatsApp, sans rien installer",
     intro:
-      "Vous utilisez déjà WhatsApp toute la journée. jingr s'en sert pour vos devis : vous envoyez un vocal comme à un collègue, et le devis chiffré revient quelques minutes plus tard, prêt à relire.",
+      "Vous utilisez déjà WhatsApp toute la journée. jingr s'en sert pour vos devis : vous envoyez un vocal comme à un collègue, et le devis chiffré revient quelques minutes plus tard, prêt à relire. L'envoi par WhatsApp ouvre très bientôt ; en attendant, c'est exactement le même principe depuis le navigateur du téléphone, sur jingr.ai/go.",
     sections: [
       {
         h2: "Comment ça marche",
@@ -45,7 +45,7 @@ export const landings: Landing[] = [
       },
     ],
     faq: [
-      ["Faut-il un compte WhatsApp Business ?", "Non. Votre WhatsApp habituel suffit : vous écrivez au numéro jingr comme à n'importe quel contact."],
+      ["Faut-il un compte WhatsApp Business ?", "Non. Votre WhatsApp habituel suffira : vous écrirez au numéro jingr comme à n'importe quel contact (ouverture très bientôt)."],
       ["Le devis part-il tout seul chez mon client ?", "Jamais. jingr prépare un brouillon ; rien n'est envoyé au client sans votre validation."],
       ["Et si je n'ai pas WhatsApp sous la main ?", "Vous pouvez aussi dicter ou écrire votre chantier sur jingr.ai/go, depuis le navigateur du téléphone."],
     ],
@@ -55,7 +55,7 @@ export const landings: Landing[] = [
     slug: "devis-artisan-sans-logiciel",
     title: "Devis artisan sans logiciel : simple, sur votre téléphone",
     description:
-      "Pas envie d'apprendre un logiciel de devis ? Dictez votre chantier sur WhatsApp, recevez un devis chiffré conforme, faites-le signer en ligne. Pour les petites entreprises du bâtiment.",
+      "Pas envie d'apprendre un logiciel de devis ? Dictez votre chantier depuis votre téléphone, recevez un devis chiffré conforme, faites-le signer en ligne. Pour les petites entreprises du bâtiment.",
     eyebrow: "Sans logiciel",
     h1: "Des devis propres, sans apprendre un logiciel",
     intro:
@@ -121,7 +121,7 @@ export const landings: Landing[] = [
     slug: "devis-plombier-chauffagiste",
     title: "Logiciel de devis plombier chauffagiste : un vocal, un devis",
     description:
-      "Plombiers et chauffagistes : chauffe-eau, fuite, chaudière, radiateur… Dictez le chantier sur WhatsApp, recevez un devis chiffré avec vos prix, TVA rénovation gérée. Modèles gratuits.",
+      "Plombiers et chauffagistes : chauffe-eau, fuite, chaudière, radiateur… Dictez le chantier depuis votre téléphone, recevez un devis chiffré avec vos prix, TVA rénovation gérée. Modèles gratuits.",
     eyebrow: "Plombiers · chauffagistes",
     h1: "Devis de plomberie et de chauffage, dictés depuis le chantier",
     intro:
@@ -146,7 +146,7 @@ export const landings: Landing[] = [
     slug: "devis-electricien",
     title: "Logiciel de devis électricien : dictez, recevez le devis chiffré",
     description:
-      "Électriciens : tableau électrique, circuits, éclairage… Dictez le chantier sur WhatsApp, recevez un devis chiffré avec vos prix et les mentions utiles. Modèles de devis électricité gratuits.",
+      "Électriciens : tableau électrique, circuits, éclairage… Dictez le chantier depuis votre téléphone, recevez un devis chiffré avec vos prix et les mentions utiles. Modèles de devis électricité gratuits.",
     eyebrow: "Électriciens",
     h1: "Devis d'électricité, dictés depuis le chantier",
     intro:
@@ -196,7 +196,7 @@ export const landings: Landing[] = [
       {
         h2: "Comment jingr s'y prend",
         body: [
-          "Vous dictez le chantier sur WhatsApp ou sur votre téléphone. jingr prépare le devis avec les prix de votre tarif et de vos devis déjà validés.",
+          "Vous dictez le chantier sur votre téléphone (bientôt aussi sur WhatsApp). jingr prépare le devis avec les prix de votre tarif et de vos devis déjà validés.",
           "Un prix inconnu apparaît en orange, « à confirmer ». Tant qu'il en reste, le devis ne peut pas être validé.",
           "Vous relisez, vous validez, votre client reçoit un lien et accepte en ligne. Démo de 30 secondes sur jingr.ai/demo.",
         ],
