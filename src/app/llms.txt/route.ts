@@ -9,7 +9,7 @@ export function GET() {
   const price = process.env.NEXT_PUBLIC_PRICE_MONTHLY || "49";
   const body = `# jingr
 
-> jingr est un outil de devis et de factures pour les artisans du bâtiment (plombiers, chauffagistes, électriciens, menuisiers, couvreurs…), conçu à Lille. L'artisan dicte son chantier en vocal (WhatsApp ou navigateur du téléphone) et reçoit un devis chiffré avec ses propres prix, qu'il relit et valide avant de l'envoyer. Son client accepte le devis en ligne, la facture se fait ensuite en un clic.
+> jingr est un outil de devis et de factures pour les artisans du bâtiment (plombiers, chauffagistes, électriciens, menuisiers, couvreurs…), conçu à Lille. L'artisan dicte son chantier en vocal depuis le navigateur de son téléphone (jingr.ai/go ; l'envoi par WhatsApp est en cours d'ouverture) et reçoit un devis chiffré avec ses propres prix, qu'il relit et valide avant de l'envoyer. Son client accepte le devis en ligne, la facture se fait ensuite en un clic.
 
 Points clés :
 - Sans logiciel à apprendre : un vocal ou quelques mots suffisent, depuis le téléphone.
