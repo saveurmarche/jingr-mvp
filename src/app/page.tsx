@@ -156,7 +156,7 @@ export default async function HomePage() {
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <StartCta label="Essayer gratuitement" />
-            <a href="#process" className="btn-secondary">Voir le parcours ↓</a>
+            <a href="#demo" className="btn-secondary">Voir la démo (30 s) ↓</a>
           </div>
           <p className="text-xs text-[#8a8496]">
             Brouillon seulement : <strong>vous validez</strong>. Jamais d&apos;envoi automatique. {FREE} devis offerts,
@@ -273,24 +273,19 @@ export default async function HomePage() {
           </div>
           <StartCta label="Tester sur mon prochain chantier" />
         </div>
-        <div className="relative flex justify-center">
+        <div className="relative order-first flex justify-center lg:order-none">
           <div className="orb h-72 w-72 bg-[#e6dcf5]" />
-          <div className="relative w-64 rounded-[2.5rem] bg-[#1b1530] p-3 shadow-2xl">
-            <div className="mx-auto mb-2 h-1.5 w-16 rounded-full bg-[#3a3150]" />
-            <div className="space-y-3 rounded-[2rem] bg-[#f8f6f1] p-4">
-              <span className="pill !text-[10px]">WhatsApp</span>
-              <div className="flex items-center gap-2 border-b border-[#ece7ef] pb-2">
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#efe9f7]"><LogoMark size={16} /></span>
-                <div className="leading-tight">
-                  <p className="text-sm font-semibold">jingr</p>
-                  <p className="text-[10px] text-[#8a8496]">en ligne</p>
-                </div>
-              </div>
-              <div className="tile tile-green text-xs">« Changement chauffe-eau 200 L, Mme Martin, rue des Lilas, ballon HS, accès garage. »</div>
-              <div className="tile tile-lav ml-6 text-xs">✅ Devis prêt : 980 € HT. Relisez et validez ici → jingr.ai/review/…</div>
-              <div className="tile tile-blue text-xs">🎉 Mme Martin a accepté votre devis.</div>
-            </div>
-          </div>
+          <video
+            className="relative w-64 rounded-[2rem] border-4 border-[#1b1530] shadow-2xl sm:w-72"
+            src="/demo/jingr-demo.mp4"
+            poster="/demo/jingr-demo.jpg"
+            controls
+            playsInline
+            muted
+            loop
+            preload="none"
+            aria-label="Démo de 30 secondes : du chantier dicté au devis accepté par le client"
+          />
         </div>
       </section>
 
