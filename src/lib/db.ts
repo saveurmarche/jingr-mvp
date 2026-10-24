@@ -3,8 +3,12 @@ import { promises as fs } from "fs";
 import path from "path";
 import type {
   Artisan,
+  BetaSignup,
+  ClientLink,
   DbShape,
+  Invoice,
   Job,
+  Testimonial,
   JobAsset,
   MessageInbox,
   QuoteDraft,
@@ -12,7 +16,8 @@ import type {
   ReviewToken,
 } from "./types";
 
-const DATA_DIR = path.join(process.cwd(), "data");
+// Sur Azure App Service, DATA_DIR=/home/data : /home est persistant, le dossier de l'app ne l'est pas.
+const DATA_DIR = process.env.DATA_DIR || path.join(process.cwd(), "data");
 const STORE_PATH = path.join(DATA_DIR, "store.json");
 
 const emptyDb = (): DbShape => ({
@@ -23,6 +28,10 @@ const emptyDb = (): DbShape => ({
   quote_events: [],
   review_tokens: [],
   message_inbox: [],
+  invoices: [],
+  testimonials: [],
+  client_links: [],
+  beta_signups: [],
 });
 
 function hasSupabaseConfig(): boolean {
@@ -42,17 +51,52 @@ async function readStore(): Promise<DbShape> {
   }
 }
 
+const BACKUP_DIR = path.join(DATA_DIR, "backups");
+const BACKUP_KEEP_DAYS = 30;
+
+/** Une copie par jour de la veille avant la première écriture du jour ; on garde 30 jours. */
+async function dailyBackup(): Promise<void> {
+  const day = new Date().toISOString().slice(0, 10);
+  const target = path.join(BACKUP_DIR, `store-${day}.json`);
+  try {
+    await fs.access(target);
+    return;
+  } catch {
+    // pas encore de copie aujourd'hui
+  }
+  try {
+    await fs.mkdir(BACKUP_DIR, { recursive: true });
+    await fs.copyFile(STORE_PATH, target);
+    const files = (await fs.readdir(BACKUP_DIR)).filter((f) => /^store-\d{4}-\d{2}-\d{2}\.json$/.test(f)).sort();
+    for (const old of files.slice(0, Math.max(0, files.length - BACKUP_KEEP_DAYS))) {
+      await fs.unlink(path.join(BACKUP_DIR, old));
+    }
+  } catch (err) {
+    // Pas de store encore (premier lancement) ou disque indisponible : on n'empêche jamais l'écriture.
+    if ((err as NodeJS.ErrnoException).code !== "ENOENT") console.error("Sauvegarde quotidienne échouée", err);
+  }
+}
+
 async function writeStore(db: DbShape): Promise<void> {
   await fs.mkdir(DATA_DIR, { recursive: true });
-  await fs.writeFile(STORE_PATH, JSON.stringify(db, null, 2), "utf8");
+  await dailyBackup();
+  // Écriture atomique : fichier temporaire puis renommage, pour ne jamais laisser un store.json tronqué.
+  const tmp = `${STORE_PATH}.${process.pid}.${Date.now()}.tmp`;
+  await fs.writeFile(tmp, JSON.stringify(db, null, 2), "utf8");
+  await fs.rename(tmp, STORE_PATH);
 }
 
 function nowIso() {
   return new Date().toISOString();
 }
 
-function normalizePhone(phone: string) {
-  return phone.replace(/\s+/g, "");
+/** Format E.164 pour la France : « 06 12 34 56 78 » et « +33612345678 » désignent le même artisan. */
+export function normalizePhone(phone: string) {
+  let p = phone.replace(/[\s.\-()]/g, "");
+  if (p.startsWith("00")) p = `+${p.slice(2)}`;
+  if (/^0\d{9}$/.test(p)) p = `+33${p.slice(1)}`;
+  if (/^33\d{9}$/.test(p)) p = `+${p}`;
+  return p;
 }
 
 export const db = {
@@ -113,6 +157,11 @@ export const db = {
     default_tva?: number;
     siret?: string;
     city?: string;
+    address?: string;
+    tva_franchise?: boolean;
+    acompte_pct?: number;
+    validity_days?: number;
+    billing_software?: string | null;
   }): Promise<Artisan> {
     const store = await readStore();
     const phone = normalizePhone(input.phone);
@@ -123,13 +172,15 @@ export const db = {
         name: input.name,
         phone: input.phone,
         email: input.email ?? null,
-        trade: input.trade ?? "plomberie",
+        trade: input.trade ?? "bâtiment",
         company_name: input.company_name ?? null,
         tutoiement: input.tutoiement ?? false,
         marge_pct: input.marge_pct ?? 30,
         default_tva: input.default_tva ?? 10,
         siret: input.siret ?? null,
         city: input.city ?? null,
+        address: input.address ?? null,
+        tva_franchise: input.tva_franchise ?? false,
         created_at: nowIso(),
       };
       store.artisans.push(artisan);
@@ -175,7 +226,53 @@ export const db = {
       artisan.city = input.city || null;
       changed = true;
     }
+    if (input.address !== undefined) {
+      artisan.address = input.address || null;
+      changed = true;
+    }
+    if (input.tva_franchise !== undefined) {
+      artisan.tva_franchise = input.tva_franchise;
+      changed = true;
+    }
+    if (input.acompte_pct !== undefined) {
+      artisan.acompte_pct = input.acompte_pct;
+      changed = true;
+    }
+    if (input.validity_days !== undefined) {
+      artisan.validity_days = input.validity_days;
+      changed = true;
+    }
+    if (input.billing_software !== undefined) {
+      artisan.billing_software = input.billing_software || null;
+      changed = true;
+    }
     if (changed) await writeStore(store);
+    return artisan;
+  },
+
+  async findArtisanByPhone(phone: string): Promise<Artisan | null> {
+    const store = await readStore();
+    const p = normalizePhone(phone);
+    return store.artisans.find((a) => normalizePhone(a.phone) === p) ?? null;
+  },
+
+  /** Rang d'inscription de l'artisan (1 = premier inscrit), pour le prix pionnier. */
+  async artisanRank(id: string): Promise<number> {
+    const store = await readStore();
+    const sorted = [...store.artisans].sort((a, b) => a.created_at.localeCompare(b.created_at));
+    const i = sorted.findIndex((a) => a.id === id);
+    return i === -1 ? Number.MAX_SAFE_INTEGER : i + 1;
+  },
+
+  async updateArtisan(
+    id: string,
+    patch: Partial<Pick<Artisan, "paused" | "price_list" | "billing_notified_at">>
+  ): Promise<Artisan | null> {
+    const store = await readStore();
+    const artisan = store.artisans.find((a) => a.id === id);
+    if (!artisan) return null;
+    Object.assign(artisan, patch);
+    await writeStore(store);
     return artisan;
   },
 
@@ -259,6 +356,7 @@ export const db = {
       title: draft.title,
       intro: draft.intro ?? null,
       line_items: draft.line_items,
+      generated_line_items: draft.generated_line_items ?? draft.line_items,
       notes: draft.notes ?? null,
       total_ht: draft.total_ht,
       total_tva: draft.total_tva,
@@ -271,6 +369,12 @@ export const db = {
     store.quote_drafts.push(created);
     await writeStore(store);
     return created;
+  },
+
+  /** Lecture seule de l'ensemble des données, pour les indicateurs du pilote (/ops). */
+  async snapshot(): Promise<Pick<DbShape, "artisans" | "jobs" | "quote_drafts">> {
+    const store = await readStore();
+    return { artisans: store.artisans, jobs: store.jobs, quote_drafts: store.quote_drafts };
   },
 
   async getDraft(id: string): Promise<QuoteDraft | null> {
@@ -365,6 +469,224 @@ export const db = {
     store.message_inbox.push(msg);
     await writeStore(store);
     return msg;
+  },
+
+  async listInboxByKind(kind: string): Promise<MessageInbox[]> {
+    const store = await readStore();
+    return store.message_inbox
+      .filter((m) => m.raw?.kind === kind)
+      .sort((a, b) => b.created_at.localeCompare(a.created_at));
+  },
+
+  /** Meta renvoie un webhook tant qu'il n'a pas reçu 200 : on déduplique par id de message. */
+  async inboxHasExternalId(externalId: string): Promise<boolean> {
+    const store = await readStore();
+    return store.message_inbox.some((m) => m.raw?.external_id === externalId);
+  },
+
+  async countDraftsForArtisan(artisanId: string): Promise<number> {
+    const store = await readStore();
+    const jobIds = new Set(
+      store.jobs.filter((j) => j.artisan_id === artisanId).map((j) => j.id)
+    );
+    return store.quote_drafts.filter((d) => jobIds.has(d.job_id)).length;
+  },
+
+  async getInvoiceByDraft(draftId: string): Promise<Invoice | null> {
+    const store = await readStore();
+    return store.invoices.find((i) => i.quote_draft_id === draftId) ?? null;
+  },
+
+  /**
+   * Crée la facture d'un devis validé. Idempotent : un devis = une facture.
+   * Numérotation chronologique continue par artisan et par année (obligation légale).
+   */
+  async createInvoiceFromDraft(draftId: string, paymentDays = 30): Promise<Invoice> {
+    const store = await readStore();
+    const existing = store.invoices.find((i) => i.quote_draft_id === draftId);
+    if (existing) return existing;
+
+    const draft = store.quote_drafts.find((d) => d.id === draftId);
+    if (!draft) throw new Error("Devis introuvable");
+    if (draft.status === "draft") throw new Error("Validez le devis avant de facturer");
+    const job = store.jobs.find((j) => j.id === draft.job_id);
+    if (!job) throw new Error("Chantier introuvable");
+
+    const now = new Date();
+    const year = now.getFullYear();
+    const prefix = `F-${year}-`;
+    const lastSeq = store.invoices
+      .filter((i) => i.artisan_id === job.artisan_id && i.number.startsWith(prefix))
+      .reduce((max, i) => Math.max(max, Number(i.number.slice(prefix.length)) || 0), 0);
+
+    const due = new Date(now);
+    due.setDate(due.getDate() + paymentDays);
+
+    const invoice: Invoice = {
+      id: randomUUID(),
+      artisan_id: job.artisan_id,
+      job_id: job.id,
+      quote_draft_id: draft.id,
+      number: `${prefix}${String(lastSeq + 1).padStart(4, "0")}`,
+      title: draft.title.replace(/^Devis/i, "Facture"),
+      line_items: draft.line_items,
+      total_ht: draft.total_ht,
+      total_tva: draft.total_tva,
+      total_ttc: draft.total_ttc,
+      issued_at: now.toISOString(),
+      due_at: due.toISOString(),
+      status: "issued",
+      paid_at: null,
+      created_at: now.toISOString(),
+    };
+    store.invoices.push(invoice);
+    await writeStore(store);
+    return invoice;
+  },
+
+  async markInvoicePaid(id: string): Promise<Invoice | null> {
+    const store = await readStore();
+    const inv = store.invoices.find((i) => i.id === id);
+    if (!inv) return null;
+    inv.status = "paid";
+    inv.paid_at = nowIso();
+    await writeStore(store);
+    return inv;
+  },
+
+  async addTestimonial(input: {
+    artisan: Artisan;
+    text: string;
+  }): Promise<Testimonial> {
+    const store = await readStore();
+    const first = input.artisan.name.split(" ")[0] || "Artisan";
+    const lastInitial = input.artisan.name.split(" ")[1]?.[0];
+    const t: Testimonial = {
+      id: randomUUID(),
+      artisan_id: input.artisan.id,
+      text: input.text,
+      display_name: lastInitial ? `${first} ${lastInitial}.` : first,
+      trade: input.artisan.trade === "chauffage" ? "Chauffagiste" : "Plombier",
+      city: input.artisan.city ?? null,
+      status: "pending",
+      consent: true,
+      created_at: nowIso(),
+    };
+    store.testimonials.push(t);
+    await writeStore(store);
+    return t;
+  },
+
+  async listTestimonials(status?: Testimonial["status"]): Promise<Testimonial[]> {
+    const store = await readStore();
+    return store.testimonials
+      .filter((t) => !status || t.status === status)
+      .sort((a, b) => b.created_at.localeCompare(a.created_at));
+  },
+
+  /** Retrait à la demande de l'artisan (RGPD) : plus jamais affiché. */
+  async withdrawTestimonials(artisanId: string): Promise<number> {
+    const store = await readStore();
+    const mine = store.testimonials.filter((t) => t.artisan_id === artisanId);
+    store.testimonials = store.testimonials.filter((t) => t.artisan_id !== artisanId);
+    await writeStore(store);
+    return mine.length;
+  },
+
+  async setTestimonialStatus(
+    id: string,
+    status: Testimonial["status"]
+  ): Promise<Testimonial | null> {
+    const store = await readStore();
+    const t = store.testimonials.find((x) => x.id === id);
+    if (!t) return null;
+    t.status = status;
+    await writeStore(store);
+    return t;
+  },
+
+  /** Lien client d'un devis validé (créé une fois, réutilisé ensuite). */
+  async getOrCreateClientLink(draftId: string): Promise<ClientLink> {
+    const store = await readStore();
+    const existing = store.client_links.find((l) => l.quote_draft_id === draftId);
+    if (existing) return existing;
+    const draft = store.quote_drafts.find((d) => d.id === draftId);
+    if (!draft) throw new Error("Devis introuvable");
+    if (draft.status === "draft") throw new Error("Validez le devis avant de l'envoyer au client");
+    const link: ClientLink = {
+      id: randomUUID(),
+      quote_draft_id: draftId,
+      token: randomUUID().replace(/-/g, "").slice(0, 24),
+      created_at: nowIso(),
+    };
+    store.client_links.push(link);
+    await writeStore(store);
+    return link;
+  },
+
+  async getClientLinkByDraft(draftId: string): Promise<ClientLink | null> {
+    const store = await readStore();
+    return store.client_links.find((l) => l.quote_draft_id === draftId) ?? null;
+  },
+
+  async getByClientToken(token: string): Promise<{
+    draft: QuoteDraft;
+    job: Job;
+    artisan?: Artisan;
+  } | null> {
+    const store = await readStore();
+    const link = store.client_links.find((l) => l.token === token);
+    if (!link) return null;
+    const draft = store.quote_drafts.find((d) => d.id === link.quote_draft_id);
+    const job = draft ? store.jobs.find((j) => j.id === draft.job_id) : undefined;
+    if (!draft || !job) return null;
+    return { draft, job, artisan: store.artisans.find((a) => a.id === job.artisan_id) };
+  },
+
+  /** Note la première ouverture du lien par le client (pour la relance). */
+  async markClientLinkViewed(token: string): Promise<void> {
+    const store = await readStore();
+    const link = store.client_links.find((l) => l.token === token);
+    if (!link || link.viewed_at) return;
+    link.viewed_at = nowIso();
+    await writeStore(store);
+  },
+
+  /** Acceptation par le client. Idempotent : la première acceptation fait foi. */
+  async acceptQuote(token: string, name: string): Promise<{ draft: QuoteDraft; already: boolean } | null> {
+    const store = await readStore();
+    const link = store.client_links.find((l) => l.token === token);
+    const draft = link ? store.quote_drafts.find((d) => d.id === link.quote_draft_id) : undefined;
+    if (!draft) return null;
+    if (draft.accepted_at) return { draft, already: true };
+    draft.accepted_at = nowIso();
+    draft.accepted_by = name;
+    draft.updated_at = nowIso();
+    store.quote_events.push({
+      id: randomUUID(),
+      quote_draft_id: draft.id,
+      event_type: "accepted_by_client",
+      payload: { name },
+      created_at: nowIso(),
+    });
+    await writeStore(store);
+    return { draft, already: false };
+  },
+
+  async addBetaSignup(input: Omit<BetaSignup, "id" | "created_at">): Promise<{ signup: BetaSignup; duplicate: boolean }> {
+    const store = await readStore();
+    const email = input.email.trim().toLowerCase();
+    const existing = store.beta_signups.find((b) => b.email === email);
+    if (existing) return { signup: existing, duplicate: true };
+    const signup: BetaSignup = { ...input, email, id: randomUUID(), created_at: nowIso() };
+    store.beta_signups.push(signup);
+    await writeStore(store);
+    return { signup, duplicate: false };
+  },
+
+  async listBetaSignups(): Promise<BetaSignup[]> {
+    const store = await readStore();
+    return store.beta_signups.slice().sort((a, b) => b.created_at.localeCompare(a.created_at));
   },
 
   async reset(): Promise<void> {
